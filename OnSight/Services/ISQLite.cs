@@ -1,10 +1,12 @@
-﻿using SQLite;
+﻿using System.Threading.Tasks;
+
+using SQLite;
 
 namespace OnSight
 {
 	public interface ISQLite
 	{
-		SQLiteConnection GetConnection();
+		SQLiteAsyncConnection GetConnection();
 	}
 }
 

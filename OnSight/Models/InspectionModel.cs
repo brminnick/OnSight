@@ -1,11 +1,8 @@
 ﻿using System;
-using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 
 using SQLite;
-
-using Xamarin.Forms;
-using System.Linq;
 
 namespace OnSight
 {
@@ -19,7 +16,7 @@ namespace OnSight
 
 		public string InspectionTitle { get; set; }
 
-		public DateTimeOffset InspectionDate { get; set; }
+		public DateTime InspectionDateUTC { get; set; }
 
 		List<NoteModel> InspectionNotesList { get; set; }
 
@@ -33,7 +30,7 @@ namespace OnSight
 			var doesImageNameExist = InspectionImageList?.FirstOrDefault(x => x.ImageName.Equals(photoModel.ImageName)) != null;
 
 			if (doesImageNameExist == true)
-				InspectionImageList.First(x => x.ImageName.Equals(photoModel.ImageName)).Image = photoModel.Image;
+				InspectionImageList.First(x => x.ImageName.Equals(photoModel.ImageName)).ImageStream = photoModel.ImageStream;
 			else
 				InspectionImageList.Add(photoModel);
 		}

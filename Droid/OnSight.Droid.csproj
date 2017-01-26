@@ -142,8 +142,10 @@
     <AndroidResource Include="Resources\drawable-hdpi\icon.png" />
     <AndroidResource Include="Resources\drawable-xhdpi\icon.png" />
     <AndroidResource Include="Resources\drawable-xxhdpi\icon.png" />
-    <AndroidResource Include="Resources\drawable-xhdpi\HSBLogo.png" />
-    <AndroidResource Include="Resources\drawable-xhdpi\MunichRELogo.png" />
+    <AndroidResource Include="Resources\drawable-xxhdpi\Add.png" />
+    <AndroidResource Include="Resources\drawable-xxhdpi\HSBLogo.png" />
+    <AndroidResource Include="Resources\drawable-xxhdpi\MunichRELogo.png" />
+    <AndroidResource Include="Resources\drawable-xxhdpi\MunichREIcon.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Services\" />

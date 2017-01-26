@@ -12,13 +12,13 @@ namespace OnSight.Droid
 	public class SQLite_Android : ISQLite
 	{
 		#region ISQLite implementation
-		public SQLiteConnection GetConnection()
+		public SQLiteAsyncConnection GetConnection()
 		{
 			var sqliteFilename = "InspectionModelDatabase.db3";
 			string documentsPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
 			var sqlLiteDatabasePath = Path.Combine(documentsPath, sqliteFilename);
 
-			var sqlLiteConnection = new SQLiteConnection(sqlLiteDatabasePath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.SharedCache);
+			var sqlLiteConnection = new SQLiteAsyncConnection(sqlLiteDatabasePath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.SharedCache);
 
 			return sqlLiteConnection;
 		}

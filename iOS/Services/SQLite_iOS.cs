@@ -14,14 +14,14 @@ namespace OnSight.iOS
 	{
 		
 		#region ISQLite implementation
-		public SQLiteConnection GetConnection()
+		public SQLiteAsyncConnection GetConnection()
 		{
 			var sqliteFilename = "InspectionModelDatabase.db3";
 			string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
 			string libraryPath = Path.Combine(folderPath, "..", "Library");
 			var sqlLiteDatabasePath = Path.Combine(libraryPath, sqliteFilename);
 
-			var sqlLiteDatabaseConnection = new SQLiteConnection(sqlLiteDatabasePath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.SharedCache);
+			var sqlLiteDatabaseConnection = new SQLiteAsyncConnection(sqlLiteDatabasePath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.SharedCache);
 
 			return sqlLiteDatabaseConnection;
 		}

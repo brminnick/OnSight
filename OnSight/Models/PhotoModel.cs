@@ -3,8 +3,6 @@ using System.IO;
 
 using SQLite;
 
-using Xamarin.Forms;
-
 namespace OnSight
 {
 	public class PhotoModel
@@ -13,7 +11,7 @@ namespace OnSight
 		public string ImageName { get; set; }
 
 		[Ignore]
-		public ImageSource Image
+		public Stream ImageStream
 		{
 			get { return GetImageSource(); }
 			set { SaveImageSource(value); }
@@ -22,12 +20,17 @@ namespace OnSight
 		string ImageAsBase64String { get; set; }
 
 		#region Methods
-		void SaveImageSource(ImageSource image)
+		void SaveImageSource(Stream image)
 		{
-			throw new Exception("SaveImageSource Not Implemented");
+			using (var memoryStream = new MemoryStream())
+			{
+				image.CopyTo(memoryStream);
+				var imageByteArray = memoryStream.ToArray();
+				ImageAsBase64String = Convert.ToBase64String(imageByteArray);
+			}
 		}
 
-		ImageSource GetImageSource()
+		Stream GetImageSource()
 		{
 			try
 			{
@@ -36,7 +39,7 @@ namespace OnSight
 
 				var imageByteArray = Convert.FromBase64String(ImageAsBase64String);
 
-				return ImageSource.FromStream(() => new MemoryStream(imageByteArray));
+				return new MemoryStream(imageByteArray);
 			}
 			catch (Exception e)
 			{

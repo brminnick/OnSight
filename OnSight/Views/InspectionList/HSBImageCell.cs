@@ -12,8 +12,8 @@ namespace OnSight
 
 			var item = BindingContext as InspectionModel;
 
-			Detail = item.InspectionTitle;
-			ImageSource = "HSBLogo";
+			Text = item.InspectionTitle;
+			ImageSource = "MunichREIcon";
 		}
 	}
 }
