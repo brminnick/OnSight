@@ -1,6 +1,4 @@
-﻿using System;
-
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
 
 namespace OnSight
 {
@@ -10,8 +8,9 @@ namespace OnSight
 		{
 			MainPage = new NavigationPage(new InspectionListPage())
 			{
-				
-			}
+				BarBackgroundColor = Color.FromHex("00538A"),
+				BarTextColor = Color.White
+			};
 		}
 	}
 }
