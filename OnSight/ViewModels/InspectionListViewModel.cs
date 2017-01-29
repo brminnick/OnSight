@@ -30,7 +30,7 @@ namespace OnSight
 			(_pullToRefreshCommand = new Command(async () => await ExecutePullToRefreshCommand()));
 
 		public Command SubmitButtonCommand => _submitButtonCommand ??
-		(_submitButtonCommand = new Command(async () => await ExecuteSubmitButtonCommand()));
+			(_submitButtonCommand = new Command(async () => await ExecuteSubmitButtonCommand()));
 
 		public List<InspectionModel> VisibleInspectionModelList
 		{

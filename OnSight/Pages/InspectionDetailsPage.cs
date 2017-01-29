@@ -1,12 +1,21 @@
 ﻿using System;
+
 using Xamarin.Forms;
+
 namespace OnSight
 {
-	public class InspectionDetailsPage : BaseContentPage<InspectionDetailsViewModel>
+	public class InspectionDetailsPage : ContentPage
 	{
+		#region Constant Fields
+		readonly InspectionDetailsViewModel _viewModel;
+		#endregion
+
 		#region Constructors
-		public InspectionDetailsPage()
+		public InspectionDetailsPage(int inspectionId)
 		{
+			_viewModel = new InspectionDetailsViewModel(inspectionId);
+			BindingContext = _viewModel;
+
 			var titleLabel = new Label
 			{
 				Text = "Title"
@@ -16,7 +25,7 @@ namespace OnSight
 			{
 				Placeholder = "Title"
 			};
-			titleEntry.SetBinding(Entry.TextProperty, nameof(ViewModel.TitleText));
+			titleEntry.SetBinding(Entry.TextProperty, nameof(_viewModel.TitleText));
 
 			var viewNotesButton = new Button
 			{

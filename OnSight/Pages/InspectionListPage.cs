@@ -1,24 +1,34 @@
-﻿using Xamarin.Forms;
-using InvestmentDataSampleApp;
+﻿using System;
+
+using Xamarin.Forms;
+
 namespace OnSight
 {
-	public class InspectionListPage : BaseContentPage<InspectionListViewModel>
+	public class InspectionListPage : ContentPage
 	{
+		#region Constant Fields
+		readonly ListView _listView;
+		readonly InspectionListViewModel _viewModel;
+		#endregion
+
 		#region Constructors
 		public InspectionListPage()
 		{
+			_viewModel = new InspectionListViewModel();
+			BindingContext = _viewModel;
+
 			var relativeLayout = new RelativeLayout();
 
-			var listView = new ListView(ListViewCachingStrategy.RecycleElement)
+			_listView = new ListView(ListViewCachingStrategy.RecycleElement)
 			{
 				ItemTemplate = new DataTemplate(typeof(HSBImageCell)),
 				IsPullToRefreshEnabled = true,
 				SeparatorVisibility = SeparatorVisibility.None
 			};
-			listView.SetBinding(ListView.RefreshCommandProperty, nameof(ViewModel.PullToRefreshCommand));
-			listView.SetBinding(ListView.ItemsSourceProperty, nameof(ViewModel.VisibleInspectionModelList));
+			_listView.SetBinding(ListView.RefreshCommandProperty, nameof(_viewModel.PullToRefreshCommand));
+			_listView.SetBinding(ListView.ItemsSourceProperty, nameof(_viewModel.VisibleInspectionModelList));
 
-			relativeLayout.Children.Add(listView,
+			relativeLayout.Children.Add(_listView,
 									   Constraint.Constant(0),
 									   Constraint.Constant(0),
 									   Constraint.RelativeToParent(parent => parent.Width),
@@ -38,13 +48,46 @@ namespace OnSight
 			};
 			ToolbarItems.Add(addInspectionToolbarItem);
 
-			Title = "On Sight";
+			Title = "OnSight";
 
 			NavigationPage.SetBackButtonTitle(this, "Home");
 
 			Content = relativeLayout;
 
-			ViewModel.PullToRefreshCompleted += (sender, e) => Device.BeginInvokeOnMainThread(listView.EndRefresh);
+		}
+		#endregion
+
+		#region Methods
+		protected override void OnAppearing()
+		{
+			base.OnAppearing();
+
+			_viewModel.PullToRefreshCompleted += HandlePullToRefreshCompleted;
+			_listView.ItemSelected += HandleItemSelected;
+		}
+
+		protected override void OnDisappearing()
+		{
+			base.OnDisappearing();
+
+			_viewModel.PullToRefreshCompleted -= HandlePullToRefreshCompleted;
+			_listView.ItemSelected -= HandleItemSelected;
+		}
+
+		void HandleItemSelected(object sender, SelectedItemChangedEventArgs e)
+		{
+			var selectedInspectionModel = e.SelectedItem as InspectionModel;
+
+			Device.BeginInvokeOnMainThread(async () =>
+			{
+				await Navigation.PushAsync(new InspectionDetailsPage(selectedInspectionModel.Id));
+				_listView.SelectedItem = null;
+			});
+		}
+
+		void HandlePullToRefreshCompleted(object sender, EventArgs e)
+		{
+			Device.BeginInvokeOnMainThread(_listView.EndRefresh);
 		}
 		#endregion
 	}

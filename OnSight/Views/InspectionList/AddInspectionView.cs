@@ -3,9 +3,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 
 using Xamarin.Forms;
-using OnSight;
 
-namespace InvestmentDataSampleApp
+namespace OnSight
 {
 	public class AddInspectionView : BaseContentView<InspectionListViewModel>
 	{

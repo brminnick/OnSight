@@ -19,23 +19,23 @@ namespace OnSight
 
 		public async Task<List<InspectionModel>> GetAllInspectionModelsAsync()
 		{
-			return await _databaseConnection.Table<InspectionModel>().ToListAsync();
+			return await _databaseConnection?.Table<InspectionModel>()?.ToListAsync();
 		}
 
 		public async Task<InspectionModel> GetInspectionModelAsync(int id)
 		{
-			return await _databaseConnection.Table<InspectionModel>().Where(x => x.Id.Equals(id)).FirstOrDefaultAsync();
+			return await _databaseConnection?.Table<InspectionModel>()?.Where(x => x.Id.Equals(id))?.FirstOrDefaultAsync() ?? null;
 		}
 
 		public async Task<int> SaveInspectionModelAsync(InspectionModel inspectionModel)
 		{
 			if (await GetInspectionModelAsync(inspectionModel.Id) != null)
 			{
-				await _databaseConnection.UpdateAsync(inspectionModel);
+				await _databaseConnection?.UpdateAsync(inspectionModel);
 				return inspectionModel.Id;
 			}
 
-			return await _databaseConnection.InsertAsync(inspectionModel);
+			return await _databaseConnection?.InsertAsync(inspectionModel);
 		}
 	}
 }
