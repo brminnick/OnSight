@@ -20,7 +20,7 @@ namespace OnSight
 		#region Methods
 		public static async Task InitializeDatabase()
 		{
-			await _databaseConnection.CreateTableAsync<InspectionModel>();
+			await _databaseConnection.CreateTablesAsync<InspectionModel, NoteModel, PhotoModel>();
 			_isDatabaseInitialized = true;
 		}
 
@@ -52,6 +52,66 @@ namespace OnSight
 			}
 
 			return await _databaseConnection?.InsertAsync(inspectionModel);
+		}
+
+		public static async Task<int> SavePhoto(PhotoModel photoModel)
+		{
+			if (!_isDatabaseInitialized)
+				await InitializeDatabase();
+			
+			if(await GetPhoto(photoModel.Id)!= null)
+			{
+				await _databaseConnection?.UpdateAsync(photoModel);
+				return photoModel.Id;
+			}
+
+			return await _databaseConnection?.InsertAsync(photoModel);
+		}
+
+		public static async Task<PhotoModel> GetPhoto(int id)
+		{
+			if (!_isDatabaseInitialized)
+				await InitializeDatabase();
+			
+			return await _databaseConnection?.Table<PhotoModel>()?.Where(x => x.Id.Equals(id))?.FirstOrDefaultAsync();
+		}
+
+		public static async Task<List<PhotoModel>> GetAllPhotosForInspection(int inspectionModelId)
+		{
+			if (!_isDatabaseInitialized)
+				await InitializeDatabase();
+
+			return await _databaseConnection?.Table<PhotoModel>().Where(x=>x.InspectionModelId.Equals(inspectionModelId)).ToListAsync();
+		}
+
+		public static async Task<int> SaveNote(NoteModel noteModel)
+		{
+			if (!_isDatabaseInitialized)
+				await InitializeDatabase();
+
+			if (await GetNote(noteModel.Id) != null)
+			{
+				await _databaseConnection?.UpdateAsync(noteModel);
+				return noteModel.Id;
+			}
+
+			return await _databaseConnection?.InsertAsync(noteModel);
+		}
+
+		public static async Task<NoteModel> GetNote(int id)
+		{
+			if (!_isDatabaseInitialized)
+				await InitializeDatabase();
+
+			return await _databaseConnection?.Table<NoteModel>()?.Where(x => x.Id.Equals(id))?.FirstOrDefaultAsync();
+		}
+
+		public static async Task<List<NoteModel>> GetAllNotes()
+		{
+			if (!_isDatabaseInitialized)
+				await InitializeDatabase();
+
+			return await _databaseConnection?.Table<NoteModel>().ToListAsync();
 		}
 		#endregion
 	}

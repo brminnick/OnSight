@@ -23,7 +23,7 @@ namespace OnSight
 
 			_notesListView = new ListView
 			{
-				ItemTemplate = new DataTemplate(typeof(PhotosListTextCell)),
+				ItemTemplate = new DataTemplate(typeof(PhotoListImageCell)),
 				IsPullToRefreshEnabled = true
 			};
 			_notesListView.SetBinding(ListView.RefreshCommandProperty, nameof(_viewModel.RefreshCommand));

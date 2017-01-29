@@ -42,8 +42,7 @@ namespace OnSight
 		#region Methods
 		async Task RefreshData()
 		{
-			var inspectionModel = await InspectionModelDatabase.GetInspectionModelAsync(_inspectionId);
-			VisiblePhotoModelList = inspectionModel?.GetAllPhotos();
+			VisiblePhotoModelList = await InspectionModelDatabase.GetAllPhotosForInspection(_inspectionId);
 		}
 
 		async Task ExecuteRefreshCommand()

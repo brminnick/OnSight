@@ -72,8 +72,7 @@ namespace OnSight
 
 		async Task ExecuteSaveButtonCommand()
 		{
-			var inspectionModel = await InspectionModelDatabase.GetInspectionModelAsync(_inspectionId);
-			var photoModelList = inspectionModel.GetAllPhotos();
+			var photoModelList = await InspectionModelDatabase.GetAllPhotosForInspection(_inspectionId);
 
 			var doesPhotoImageNameTextExist = photoModelList?.FirstOrDefault(x => x.ImageName.Equals(PhotoImageNameText)) != null;
 
@@ -112,14 +111,22 @@ namespace OnSight
 		{
 			var photoModel = new PhotoModel
 			{
+				InspectionModelId = _inspectionId,
 				ImageName = PhotoImageNameText,
-				ImageStream = PhotoMediaFile.GetStream()
+				ImageAsBase64String = ConvertStreamToBase64String(PhotoMediaFile.GetStream())
 			};
 
-			var inspectionModel = await InspectionModelDatabase.GetInspectionModelAsync(_inspectionId);
-			inspectionModel.SavePhoto(photoModel);
+			await InspectionModelDatabase.SavePhoto(photoModel);
+		}
 
-			await InspectionModelDatabase.SaveInspectionModelAsync(inspectionModel);
+		string ConvertStreamToBase64String(Stream stream)
+		{
+			using (MemoryStream memoryStream = new MemoryStream())
+			{
+				stream.CopyTo(memoryStream);
+				var imageAsByteArray = memoryStream.ToArray();
+				return Convert.ToBase64String(imageAsByteArray);
+			}
 		}
 
 		async Task<string> GenerateDefaultPhotoName()
@@ -127,8 +134,7 @@ namespace OnSight
 			int defaultPhotoNumber = 1;
 			string defaultPhotoText = "Photo";
 
-			var inspectionModel = await InspectionModelDatabase.GetInspectionModelAsync(_inspectionId);
-			var photoModelList = inspectionModel?.GetAllPhotos();
+			var photoModelList = await InspectionModelDatabase.GetAllPhotosForInspection(_inspectionId);
 
 			if (photoModelList != null)
 			{

@@ -2,37 +2,29 @@
 using System.IO;
 
 using SQLite;
+
 using Xamarin.Forms;
 
 namespace OnSight
 {
 	public class PhotoModel
 	{
+		#region Properties
 		[Ignore]
-		public Stream ImageStream
-		{
-			get { return GetImageStream(); }
-			set { SaveImageStream(value); }
-		}
+		public ImageSource ImageSource => GetImageSource();
+
+		[Unique, AutoIncrement, PrimaryKey]
+		public int Id { get; set; }
 
 		public int InspectionModelId { get; set; }
 
 		public string ImageName { get; set; }
 
-		string ImageAsBase64String { get; set; }
+		public string ImageAsBase64String { get; set; }
+		#endregion
 
 		#region Methods
-		void SaveImageStream(Stream image)
-		{
-			using (var memoryStream = new MemoryStream())
-			{
-				image.CopyTo(memoryStream);
-				var imageByteArray = memoryStream.ToArray();
-				ImageAsBase64String = Convert.ToBase64String(imageByteArray);
-			}
-		}
-
-		Stream GetImageStream()
+		ImageSource GetImageSource()
 		{
 			try
 			{
@@ -41,7 +33,7 @@ namespace OnSight
 
 				var imageByteArray = Convert.FromBase64String(ImageAsBase64String);
 
-				return new MemoryStream(imageByteArray);
+				return ImageSource.FromStream(() => new MemoryStream(imageByteArray));
 			}
 			catch (Exception e)
 			{
