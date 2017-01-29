@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Xamarin.Forms;
+using System.Threading.Tasks;
 
 namespace OnSight
 {
@@ -64,6 +65,8 @@ namespace OnSight
 
 			_viewModel.PullToRefreshCompleted += HandlePullToRefreshCompleted;
 			_listView.ItemSelected += HandleItemSelected;
+
+			UpdateListData();
 		}
 
 		protected override void OnDisappearing()
@@ -72,6 +75,11 @@ namespace OnSight
 
 			_viewModel.PullToRefreshCompleted -= HandlePullToRefreshCompleted;
 			_listView.ItemSelected -= HandleItemSelected;
+		}
+
+		void UpdateListData()
+		{
+			Device.BeginInvokeOnMainThread(_listView.BeginRefresh);
 		}
 
 		void HandleItemSelected(object sender, SelectedItemChangedEventArgs e)

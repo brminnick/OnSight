@@ -13,6 +13,7 @@ namespace OnSight
 
 		#region Fields
 		string _titleText;
+		Command _saveDataCommand;
 		InspectionModel _inspectionModel;
 		#endregion
 
@@ -29,6 +30,9 @@ namespace OnSight
 		#endregion
 
 		#region Properties 
+		public Command SaveDataCommand => _saveDataCommand ??
+			(_saveDataCommand = new Command(async () => await ExecuteSaveDataCommand()));
+
 		public string TitleText
 		{
 			get { return _titleText; }
@@ -44,7 +48,7 @@ namespace OnSight
 		#endregion
 
 		#region Methods
-		async Task ExecuteSaveButtonCommand()
+		async Task ExecuteSaveDataCommand()
 		{
 			InspectionModel.InspectionTitle = TitleText;
 

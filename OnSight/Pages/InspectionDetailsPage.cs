@@ -16,11 +16,6 @@ namespace OnSight
 			_viewModel = new InspectionDetailsViewModel(inspectionId);
 			BindingContext = _viewModel;
 
-			var titleLabel = new Label
-			{
-				Text = "Title"
-			};
-
 			var titleEntry = new Entry
 			{
 				Placeholder = "Title"
@@ -37,15 +32,32 @@ namespace OnSight
 				Text = "Images"
 			};
 
-			Content = new StackLayout
+			this.SetBinding(TitleProperty, nameof(_viewModel.TitleText));
+
+			Padding = new Thickness(20, 10);
+
+			var stackLayout = new StackLayout
 			{
 				Children = {
-					titleLabel,
 					titleEntry,
 					viewNotesButton,
 					viewImagesButton
 				}
 			};
+
+			Content = new ScrollView
+			{
+				Content = stackLayout
+			};
+		}
+		#endregion
+
+		#region Methods
+		protected override void OnDisappearing()
+		{
+			base.OnDisappearing();
+
+			_viewModel?.SaveDataCommand?.Execute(null);
 		}
 		#endregion
 	}
