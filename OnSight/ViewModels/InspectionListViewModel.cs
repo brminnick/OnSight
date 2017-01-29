@@ -48,7 +48,7 @@ namespace OnSight
 		#region Methods
 		async Task ExecutePullToRefreshCommand()
 		{
-			await DisplayRefreshingIndicator(1);
+			await DisplayRefreshingIndicator(500);
 			await RefreshData();
 			OnPullToRefreshCompleted();
 		}
@@ -61,19 +61,19 @@ namespace OnSight
 				InspectionDateUTC = DateTime.UtcNow
 			};
 
-			var inspectionId = await App.Database.SaveInspectionModelAsync(inspectionModel);
+			var inspectionId = await InspectionModelDatabase.SaveInspectionModelAsync(inspectionModel);
 
 			await RefreshData();
 		}
 
 		async Task RefreshData()
 		{
-			VisibleInspectionModelList = await App.Database.GetAllInspectionModelsAsync();
+			VisibleInspectionModelList = await InspectionModelDatabase.GetAllInspectionModelsAsync();
 		}
 
-		async Task DisplayRefreshingIndicator(int indicatorDisplayTimeInSeconds)
+		async Task DisplayRefreshingIndicator(int indicatorDisplayTimeInMilliseconds)
 		{
-			await Task.Delay(TimeSpan.FromSeconds(indicatorDisplayTimeInSeconds));
+			await Task.Delay(TimeSpan.FromMilliseconds(indicatorDisplayTimeInMilliseconds));
 		}
 
 		void OnPullToRefreshCompleted()

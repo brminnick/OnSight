@@ -2,25 +2,27 @@
 using System.IO;
 
 using SQLite;
+using Xamarin.Forms;
 
 namespace OnSight
 {
 	public class PhotoModel
 	{
-		[Unique]
-		public string ImageName { get; set; }
-
 		[Ignore]
 		public Stream ImageStream
 		{
-			get { return GetImageSource(); }
-			set { SaveImageSource(value); }
+			get { return GetImageStream(); }
+			set { SaveImageStream(value); }
 		}
+
+		public int InspectionModelId { get; set; }
+
+		public string ImageName { get; set; }
 
 		string ImageAsBase64String { get; set; }
 
 		#region Methods
-		void SaveImageSource(Stream image)
+		void SaveImageStream(Stream image)
 		{
 			using (var memoryStream = new MemoryStream())
 			{
@@ -30,7 +32,7 @@ namespace OnSight
 			}
 		}
 
-		Stream GetImageSource()
+		Stream GetImageStream()
 		{
 			try
 			{

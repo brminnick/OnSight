@@ -4,7 +4,8 @@ namespace OnSight
 {
 	public class NoteModel
 	{
-		[Unique]
+		public int InspectionModelId { get; set; }
+
 		public string Title { get; set; }
 
 		public string Details { get; set; }

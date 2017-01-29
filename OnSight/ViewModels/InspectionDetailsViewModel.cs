@@ -52,7 +52,7 @@ namespace OnSight
 		{
 			InspectionModel.InspectionTitle = TitleText;
 
-			await App.Database.SaveInspectionModelAsync(InspectionModel);
+			await InspectionModelDatabase.SaveInspectionModelAsync(InspectionModel);
 		}
 
 		async Task UpdateInspectionModel()
@@ -60,7 +60,7 @@ namespace OnSight
 			if (InspectionModel?.Id == _inspectionId)
 				return;
 
-			InspectionModel = await App.Database.GetInspectionModelAsync(_inspectionId);
+			InspectionModel = await InspectionModelDatabase.GetInspectionModelAsync(_inspectionId);
 		}
 
 		void HandleInspectionModelUpdated()

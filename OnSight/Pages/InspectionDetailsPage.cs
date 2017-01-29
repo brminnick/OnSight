@@ -8,11 +8,15 @@ namespace OnSight
 	{
 		#region Constant Fields
 		readonly InspectionDetailsViewModel _viewModel;
+		readonly int _inspectionId;
+		Button _viewNotesButton, _viewPhotosButton;
 		#endregion
 
 		#region Constructors
 		public InspectionDetailsPage(int inspectionId)
 		{
+			_inspectionId = inspectionId;
+
 			_viewModel = new InspectionDetailsViewModel(inspectionId);
 			BindingContext = _viewModel;
 
@@ -22,14 +26,14 @@ namespace OnSight
 			};
 			titleEntry.SetBinding(Entry.TextProperty, nameof(_viewModel.TitleText));
 
-			var viewNotesButton = new Button
+			_viewNotesButton = new Button
 			{
 				Text = "Notes"
 			};
 
-			var viewImagesButton = new Button
+			_viewPhotosButton = new Button
 			{
-				Text = "Images"
+				Text = "Photos"
 			};
 
 			this.SetBinding(TitleProperty, nameof(_viewModel.TitleText));
@@ -40,8 +44,8 @@ namespace OnSight
 			{
 				Children = {
 					titleEntry,
-					viewNotesButton,
-					viewImagesButton
+					_viewNotesButton,
+					_viewPhotosButton
 				}
 			};
 
@@ -53,12 +57,34 @@ namespace OnSight
 		#endregion
 
 		#region Methods
+
+		protected override void OnAppearing()
+		{
+			base.OnAppearing();
+
+			_viewNotesButton.Clicked += HandleViewNotesButtonClicked;
+			_viewPhotosButton.Clicked += HandleViewPhotosButtonClicked;
+		}
+
 		protected override void OnDisappearing()
 		{
 			base.OnDisappearing();
 
 			_viewModel?.SaveDataCommand?.Execute(null);
+
+			_viewNotesButton.Clicked -= HandleViewNotesButtonClicked;
+			_viewPhotosButton.Clicked -= HandleViewPhotosButtonClicked;
 		}
 		#endregion
+
+		void HandleViewNotesButtonClicked(object sender, EventArgs e)
+		{
+			//ToDo
+		}
+
+		void HandleViewPhotosButtonClicked(object sender, EventArgs e)
+		{
+			Device.BeginInvokeOnMainThread(async () => await Navigation.PushAsync(new PhotosListPage(_inspectionId)));
+		}
 	}
 }

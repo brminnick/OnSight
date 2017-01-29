@@ -45,6 +45,12 @@
     <Compile Include="Views\BaseContentView.cs" />
     <Compile Include="Constants\AnimationConstants.cs" />
     <Compile Include="Services\ISQLite.cs" />
+    <Compile Include="Pages\PhotosListPage.cs" />
+    <Compile Include="Views\NotesList\PhotosListTextCell.cs" />
+    <Compile Include="ViewModels\PhotosListViewModel.cs" />
+    <Compile Include="Pages\AddPhotoPage.cs" />
+    <Compile Include="ViewModels\AddPhotoViewModel.cs" />
+    <Compile Include="Constants\ColorConstants.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xamarin.Forms.Core">
@@ -87,6 +93,7 @@
     <Folder Include="Helpers\" />
     <Folder Include="Services\" />
     <Folder Include="Constants\" />
+    <Folder Include="Views\NotesList\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\packages\Xamarin.Forms.2.3.3.180\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets" Condition="Exists('..\packages\Xamarin.Forms.2.3.3.180\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets')" />

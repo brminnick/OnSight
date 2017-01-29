@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 using SQLite;
 
+using Xamarin.Forms;
+
 namespace OnSight
 {
 	public class InspectionModel
@@ -18,26 +20,31 @@ namespace OnSight
 
 		public DateTime InspectionDateUTC { get; set; }
 
-		List<NoteModel> InspectionNotesList { get; set; }
+		List<NoteModel> InspectionNotesList { get; set; } = new List<NoteModel>();
 
-		List<PhotoModel> InspectionImageList { get; set; }
+		List<PhotoModel> InspectionPhotoList { get; set; } = new List<PhotoModel>();
 
 		#endregion
 
 		#region Methods
 		public void SavePhoto(PhotoModel photoModel)
 		{
-			var doesImageNameExist = InspectionImageList?.FirstOrDefault(x => x.ImageName.Equals(photoModel.ImageName)) != null;
+			var doesImageNameExist = InspectionPhotoList?.FirstOrDefault(x => x.ImageName.Equals(photoModel.ImageName)) != null;
 
 			if (doesImageNameExist == true)
-				InspectionImageList.First(x => x.ImageName.Equals(photoModel.ImageName)).ImageStream = photoModel.ImageStream;
+				InspectionPhotoList.First(x => x.ImageName.Equals(photoModel.ImageName)).ImageStream = photoModel.ImageStream;
 			else
-				InspectionImageList.Add(photoModel);
+				InspectionPhotoList.Add(photoModel);
 		}
 
 		public PhotoModel GetPhoto(string imageName)
 		{
-			return InspectionImageList?.FirstOrDefault(x => x.ImageName.Equals(imageName));
+			return InspectionPhotoList?.FirstOrDefault(x => x.ImageName.Equals(imageName));
+		}
+
+		public List<PhotoModel> GetAllPhotos()
+		{
+			return InspectionPhotoList;
 		}
 
 		public void SaveNote(NoteModel noteModel)
@@ -55,6 +62,11 @@ namespace OnSight
 		public NoteModel GetNote(string title)
 		{
 			return InspectionNotesList?.FirstOrDefault(x => x.Title.Equals(title));
+		}
+
+		public List<NoteModel> GetAllNotes()
+		{
+			return InspectionNotesList;
 		}
 		#endregion
 	}

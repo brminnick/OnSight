@@ -7,28 +7,44 @@ using Xamarin.Forms;
 
 namespace OnSight
 {
-	public class InspectionModelDatabase
+	public static class InspectionModelDatabase
 	{
-		readonly SQLiteAsyncConnection _databaseConnection;
+		#region Constant Fields
+		static readonly SQLiteAsyncConnection _databaseConnection = DependencyService.Get<ISQLite>()?.GetConnection();
+		#endregion
 
-		public InspectionModelDatabase()
+		#region Fields
+		static bool _isDatabaseInitialized;
+		#endregion
+
+		#region Methods
+		public static async Task InitializeDatabase()
 		{
-			_databaseConnection = DependencyService.Get<ISQLite>()?.GetConnection();
-			_databaseConnection.CreateTableAsync<InspectionModel>();
+			await _databaseConnection.CreateTableAsync<InspectionModel>();
+			_isDatabaseInitialized = true;
 		}
 
-		public async Task<List<InspectionModel>> GetAllInspectionModelsAsync()
+		public static async Task<List<InspectionModel>> GetAllInspectionModelsAsync()
 		{
+			if (!_isDatabaseInitialized)
+				await InitializeDatabase();
+
 			return await _databaseConnection?.Table<InspectionModel>()?.ToListAsync();
 		}
 
-		public async Task<InspectionModel> GetInspectionModelAsync(int id)
+		public static async Task<InspectionModel> GetInspectionModelAsync(int id)
 		{
+			if (!_isDatabaseInitialized)
+				await InitializeDatabase();
+
 			return await _databaseConnection?.Table<InspectionModel>()?.Where(x => x.Id.Equals(id))?.FirstOrDefaultAsync() ?? null;
 		}
 
-		public async Task<int> SaveInspectionModelAsync(InspectionModel inspectionModel)
+		public static async Task<int> SaveInspectionModelAsync(InspectionModel inspectionModel)
 		{
+			if (!_isDatabaseInitialized)
+				await InitializeDatabase();
+
 			if (await GetInspectionModelAsync(inspectionModel.Id) != null)
 			{
 				await _databaseConnection?.UpdateAsync(inspectionModel);
@@ -37,6 +53,7 @@ namespace OnSight
 
 			return await _databaseConnection?.InsertAsync(inspectionModel);
 		}
+		#endregion
 	}
 }
 
