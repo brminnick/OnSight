@@ -23,11 +23,6 @@ namespace OnSight
 
             Title = "Photos";
         }
-
-        private void _notesListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
         #endregion
 
         #region Methods
