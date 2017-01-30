@@ -12,7 +12,7 @@ namespace OnSight
 		#endregion
 
 		#region Fields
-		string _titleText;
+		string _titleText, _notesText = "Notes";
 		Command _saveDataCommand;
 		InspectionModel _inspectionModel;
 		#endregion
@@ -39,10 +39,16 @@ namespace OnSight
 			set { SetProperty(ref _titleText, value); }
 		}
 
+		public string NotesText
+		{
+			get { return _notesText; }
+			set { SetProperty(ref _notesText, value); }
+		}
+
 		InspectionModel InspectionModel
 		{
 			get { return _inspectionModel; }
-			set { SetProperty(ref _inspectionModel, value, HandleInspectionModelUpdated); }
+			set { SetProperty(ref _inspectionModel, value, async () => await UpdateInspectionModel()); }
 		}
 
 		#endregion
@@ -50,6 +56,7 @@ namespace OnSight
 		#region Methods
 		async Task ExecuteSaveDataCommand()
 		{
+			InspectionModel.InspectionNotes = NotesText;
 			InspectionModel.InspectionTitle = TitleText;
 
 			await InspectionModelDatabase.SaveInspectionModelAsync(InspectionModel);
@@ -61,10 +68,7 @@ namespace OnSight
 				return;
 
 			InspectionModel = await InspectionModelDatabase.GetInspectionModelAsync(_inspectionId);
-		}
-
-		void HandleInspectionModelUpdated()
-		{
+			NotesText = InspectionModel.InspectionNotes;
 			TitleText = InspectionModel.InspectionTitle;
 		}
 		#endregion

@@ -20,7 +20,7 @@ namespace OnSight
 		#region Methods
 		public static async Task InitializeDatabase()
 		{
-			await _databaseConnection.CreateTablesAsync<InspectionModel, NoteModel, PhotoModel>();
+			await _databaseConnection.CreateTablesAsync<InspectionModel, PhotoModel>();
 			_isDatabaseInitialized = true;
 		}
 
@@ -82,36 +82,6 @@ namespace OnSight
 				await InitializeDatabase();
 
 			return await _databaseConnection?.Table<PhotoModel>().Where(x=>x.InspectionModelId.Equals(inspectionModelId)).ToListAsync();
-		}
-
-		public static async Task<int> SaveNote(NoteModel noteModel)
-		{
-			if (!_isDatabaseInitialized)
-				await InitializeDatabase();
-
-			if (await GetNote(noteModel.Id) != null)
-			{
-				await _databaseConnection?.UpdateAsync(noteModel);
-				return noteModel.Id;
-			}
-
-			return await _databaseConnection?.InsertAsync(noteModel);
-		}
-
-		public static async Task<NoteModel> GetNote(int id)
-		{
-			if (!_isDatabaseInitialized)
-				await InitializeDatabase();
-
-			return await _databaseConnection?.Table<NoteModel>()?.Where(x => x.Id.Equals(id))?.FirstOrDefaultAsync();
-		}
-
-		public static async Task<List<NoteModel>> GetAllNotes()
-		{
-			if (!_isDatabaseInitialized)
-				await InitializeDatabase();
-
-			return await _databaseConnection?.Table<NoteModel>().ToListAsync();
 		}
 		#endregion
 	}

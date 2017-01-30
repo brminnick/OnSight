@@ -37,7 +37,6 @@
     <Compile Include="Models\InspectionModel.cs" />
     <Compile Include="Helpers\DebugHelpers.cs" />
     <Compile Include="Models\PhotoModel.cs" />
-    <Compile Include="Models\NoteModel.cs" />
     <Compile Include="Services\InspectionModelDatabase.cs" />
     <Compile Include="Pages\InspectionDetailsPage.cs" />
     <Compile Include="ViewModels\InspectionDetailsViewModel.cs" />

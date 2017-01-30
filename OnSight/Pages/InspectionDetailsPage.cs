@@ -9,7 +9,7 @@ namespace OnSight
 		#region Constant Fields
 		readonly InspectionDetailsViewModel _viewModel;
 		readonly int _inspectionId;
-		Button _viewNotesButton, _viewPhotosButton;
+		Button _viewPhotosButton;
 		#endregion
 
 		#region Constructors
@@ -22,14 +22,16 @@ namespace OnSight
 
 			var titleEntry = new Entry
 			{
-				Placeholder = "Title"
+				Placeholder = "Title",
+				HorizontalTextAlignment = TextAlignment.Center
 			};
 			titleEntry.SetBinding(Entry.TextProperty, nameof(_viewModel.TitleText));
 
-			_viewNotesButton = new Button
+			var notesEditor = new Editor
 			{
-				Text = "Notes"
+				BackgroundColor = ColorConstants.EditorBackgroundColor
 			};
+			notesEditor.SetBinding(Editor.TextProperty, nameof(_viewModel.NotesText));
 
 			_viewPhotosButton = new Button
 			{
@@ -40,18 +42,29 @@ namespace OnSight
 
 			Padding = new Thickness(20, 10);
 
-			var stackLayout = new StackLayout
-			{
-				Children = {
-					titleEntry,
-					_viewNotesButton,
-					_viewPhotosButton
-				}
-			};
+			var relativeLayout = new RelativeLayout();
 
+			Func<RelativeLayout, double> getPhotosButtonHeight = (p) => _viewPhotosButton.Measure(relativeLayout.Width, relativeLayout.Height).Request.Height;
+			Func<RelativeLayout, double> getPhotosButtonWidth = (p) => _viewPhotosButton.Measure(relativeLayout.Width, relativeLayout.Height).Request.Width;
+
+			Func<RelativeLayout, double> getTitleEntryHeight = (p) => titleEntry.Measure(relativeLayout.Width, relativeLayout.Height).Request.Height;
+			Func<RelativeLayout, double> getTitleEntryWidth = (p) => titleEntry.Measure(relativeLayout.Width, relativeLayout.Height).Request.Width;
+
+			relativeLayout.Children.Add(titleEntry,
+									   Constraint.Constant(0),
+									   Constraint.Constant(0),
+									   Constraint.RelativeToParent(parent => parent.Width));
+			relativeLayout.Children.Add(notesEditor,
+									   Constraint.Constant(0),
+									   Constraint.RelativeToView(titleEntry, (parent, view) => view.Height + view.Y + 10),
+									   Constraint.RelativeToParent(parent => parent.Width),
+									   Constraint.RelativeToParent(parent => parent.Height / 2 - getTitleEntryHeight(parent) - getPhotosButtonHeight(parent) - 30));
+			relativeLayout.Children.Add(_viewPhotosButton,
+									   Constraint.RelativeToParent(parent => parent.Width / 2 - getPhotosButtonWidth(parent) / 2),
+									   Constraint.RelativeToView(notesEditor, (parent, view) => view.Height + view.Y + 10));
 			Content = new ScrollView
 			{
-				Content = stackLayout
+				Content = relativeLayout
 			};
 		}
 		#endregion
@@ -62,7 +75,6 @@ namespace OnSight
 		{
 			base.OnAppearing();
 
-			_viewNotesButton.Clicked += HandleViewNotesButtonClicked;
 			_viewPhotosButton.Clicked += HandleViewPhotosButtonClicked;
 		}
 
@@ -72,15 +84,11 @@ namespace OnSight
 
 			_viewModel?.SaveDataCommand?.Execute(null);
 
-			_viewNotesButton.Clicked -= HandleViewNotesButtonClicked;
 			_viewPhotosButton.Clicked -= HandleViewPhotosButtonClicked;
 		}
 		#endregion
 
-		void HandleViewNotesButtonClicked(object sender, EventArgs e)
-		{
-			//ToDo
-		}
+
 
 		void HandleViewPhotosButtonClicked(object sender, EventArgs e)
 		{

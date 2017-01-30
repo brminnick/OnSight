@@ -13,6 +13,8 @@ namespace OnSight
 		public string InspectionTitle { get; set; }
 
 		public DateTime InspectionDateUTC { get; set; }
+
+		public string InspectionNotes { get; set; }
 		#endregion
 	}
 }
