@@ -20,12 +20,12 @@ namespace OnSight
 			BindingContext = _viewModel;
 
 			_saveButton = new ToolbarItem();
-			_saveButton.Text = "Save";
+			_saveButton.Icon = Device.OnPlatform("Save", "Save", "Assets/Save.png");
 			_saveButton.SetBinding(ToolbarItem.CommandProperty,nameof(_viewModel.SaveButtonCommand));
 			ToolbarItems.Add(_saveButton);
 
 			var cancelButton = new ToolbarItem();
-			cancelButton.Text = "Cancel";
+			cancelButton.Icon = Device.OnPlatform("Cancel", "Cancel", "Assets/Cancel.png");
 			cancelButton.Clicked += (sender, e) => DismissPage();
 			ToolbarItems.Add(cancelButton);
 

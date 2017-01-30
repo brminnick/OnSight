@@ -158,6 +158,8 @@
     <BundleResource Include="Resources\MunichRELogo.png" />
     <BundleResource Include="Resources\Add%402x.png" />
     <BundleResource Include="Resources\MunichREIcon%402x.png" />
+    <BundleResource Include="Resources\Cancel%402x.png" />
+    <BundleResource Include="Resources\Save%402x.png" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Add.png" />
