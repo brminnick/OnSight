@@ -18,9 +18,55 @@ namespace OnSight
 			_viewModel = new InspectionListViewModel();
 			BindingContext = _viewModel;
 
+			var relativeLayout = new RelativeLayout();
+
+			_listView = new ListView(ListViewCachingStrategy.RecycleElement)
+			{
+				ItemTemplate = new DataTemplate(typeof(HSBViewCell)),
+				IsPullToRefreshEnabled = true,
+				SeparatorVisibility = SeparatorVisibility.None,
+				RowHeight = 50
+			};
+			_listView.SetBinding(ListView.RefreshCommandProperty, nameof(_viewModel.PullToRefreshCommand));
+			_listView.SetBinding(ListView.ItemsSourceProperty, nameof(_viewModel.VisibleInspectionModelList));
+
+			relativeLayout.Children.Add(_listView,
+									   Constraint.Constant(0),
+									   Constraint.Constant(0),
+									   Constraint.RelativeToParent(parent => parent.Width),
+									   Constraint.RelativeToParent(parent => parent.Height));
+
+			var addInspectionToolbarItem = new ToolbarItem();
+			switch (Device.RuntimePlatform)
+			{
+				case Device.iOS:
+				case Device.Android:
+					addInspectionToolbarItem.Icon = "Add";
+					break;
+				case Device.Windows:
+					addInspectionToolbarItem.Icon = "Assets/Add.png";
+					break;
+				default:
+					throw new Exception("Runtime Platform Not Supported");
+			}
+			addInspectionToolbarItem.Clicked += (sender, e) =>
+			{
+				var addInspectionView = new AddInspectionView();
+
+				relativeLayout.Children.Add(addInspectionView,
+										   Constraint.Constant(0),
+										   Constraint.Constant(0));
+
+				addInspectionView.DisplayView();
+			};
+			ToolbarItems.Add(addInspectionToolbarItem);
+
 			Title = "OnSight";
 
 			NavigationPage.SetBackButtonTitle(this, "Home");
+
+			Content = relativeLayout;
+
 		}
 		#endregion
 

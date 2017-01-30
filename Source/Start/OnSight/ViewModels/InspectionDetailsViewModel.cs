@@ -12,6 +12,7 @@ namespace OnSight
 		#endregion
 
 		#region Fields
+		bool _isPhotosButtonEnabled;
 		string _titleText, _notesText = "Notes";
 		Command _saveDataCommand;
 		InspectionModel _inspectionModel;
@@ -36,7 +37,13 @@ namespace OnSight
 		public string TitleText
 		{
 			get { return _titleText; }
-			set { SetProperty(ref _titleText, value); }
+			set { SetProperty(ref _titleText, value, UpdateIsPhotosButtonEnabled); }
+		}
+
+		public bool IsPhotosButtonEnabled
+		{
+			get { return _isPhotosButtonEnabled; }
+			set { SetProperty(ref _isPhotosButtonEnabled, value); }
 		}
 
 		public string NotesText
@@ -70,6 +77,14 @@ namespace OnSight
 			InspectionModel = await InspectionModelDatabase.GetInspectionModelAsync(_inspectionId);
 			NotesText = InspectionModel.InspectionNotes;
 			TitleText = InspectionModel.InspectionTitle;
+		}
+
+		void UpdateIsPhotosButtonEnabled()
+		{
+			if (string.IsNullOrEmpty(TitleText))
+				IsPhotosButtonEnabled = false;
+			else
+				IsPhotosButtonEnabled = true;
 		}
 		#endregion
 	}
