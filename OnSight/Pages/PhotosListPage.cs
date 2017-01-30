@@ -30,7 +30,7 @@ namespace OnSight
 			_notesListView.SetBinding(ListView.ItemsSourceProperty, nameof(_viewModel.VisiblePhotoModelList));
 
 			_addPhotoToolbarItem = new ToolbarItem();
-			_addPhotoToolbarItem.Icon = "Add";
+			_addPhotoToolbarItem.Icon = Device.OnPlatform("Add","Add","Assets/Add.png");
 			ToolbarItems.Add(_addPhotoToolbarItem);
 
 			Title = "Photos";

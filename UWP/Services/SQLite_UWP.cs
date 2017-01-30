@@ -19,8 +19,8 @@ namespace OnSight.UWP
         {
             var sqliteFilename = "InspectionModelDatabase.db3";
             string sqlLiteDataPath = Path.Combine(ApplicationData.Current.LocalFolder.Path, sqliteFilename);
-            var sqlLiteConnection = new SQLiteAsyncConnection(sqlLiteDataPath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.SharedCache);
-            return sqlLiteConnection;
+            var sqlLiteDatabaseConnection = new SQLiteAsyncConnection(sqlLiteDataPath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.SharedCache);
+            return sqlLiteDatabaseConnection;
         }
     }
     #endregion

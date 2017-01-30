@@ -46,14 +46,18 @@ namespace OnSight
 
 			this.SetBinding(TitleProperty, nameof(_viewModel.PhotoImageNameText));
 
-			Content = new StackLayout
-			{
-				Children = {
-					photoImage,
-					_photoImageNameEntry,
-					takePhotoButton
-				}
-			};
+            Content = new ScrollView
+            {
+
+                Content = new StackLayout
+                {
+                    Children = {
+                    photoImage,
+                    _photoImageNameEntry,
+                    takePhotoButton
+                    }
+                }
+            };
 		}
 		#endregion
 

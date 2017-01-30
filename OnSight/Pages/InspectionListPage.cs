@@ -24,7 +24,8 @@ namespace OnSight
 			{
 				ItemTemplate = new DataTemplate(typeof(HSBImageCell)),
 				IsPullToRefreshEnabled = true,
-				SeparatorVisibility = SeparatorVisibility.None
+				SeparatorVisibility = SeparatorVisibility.None,
+                RowHeight = 50
 			};
 			_listView.SetBinding(ListView.RefreshCommandProperty, nameof(_viewModel.PullToRefreshCommand));
 			_listView.SetBinding(ListView.ItemsSourceProperty, nameof(_viewModel.VisibleInspectionModelList));
@@ -64,7 +65,7 @@ namespace OnSight
 			base.OnAppearing();
 
 			_viewModel.PullToRefreshCompleted += HandlePullToRefreshCompleted;
-			_listView.ItemSelected += HandleItemSelected;
+			_listView.ItemTapped += HandleItemTapped;
 
 			UpdateListData();
 		}
@@ -74,7 +75,7 @@ namespace OnSight
 			base.OnDisappearing();
 
 			_viewModel.PullToRefreshCompleted -= HandlePullToRefreshCompleted;
-			_listView.ItemSelected -= HandleItemSelected;
+			_listView.ItemTapped -= HandleItemTapped;
 		}
 
 		void UpdateListData()
@@ -82,9 +83,9 @@ namespace OnSight
 			Device.BeginInvokeOnMainThread(_listView.BeginRefresh);
 		}
 
-		void HandleItemSelected(object sender, SelectedItemChangedEventArgs e)
+		void HandleItemTapped(object sender, ItemTappedEventArgs e)
 		{
-			var selectedInspectionModel = e.SelectedItem as InspectionModel;
+			var selectedInspectionModel = e.Item as InspectionModel;
 
 			Device.BeginInvokeOnMainThread(async () =>
 			{
