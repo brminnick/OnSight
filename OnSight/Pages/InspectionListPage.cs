@@ -37,7 +37,18 @@ namespace OnSight
 									   Constraint.RelativeToParent(parent => parent.Height));
 
 			var addInspectionToolbarItem = new ToolbarItem();
-			addInspectionToolbarItem.Icon = Device.OnPlatform("Add","Add","Assets/Add.png");
+			switch (Device.RuntimePlatform)
+			{
+				case Device.iOS:
+				case Device.Android:
+					addInspectionToolbarItem.Icon = "Add";
+					break;
+				case Device.Windows:
+					addInspectionToolbarItem.Icon = "Assets/Add.png";
+					break;
+				default:
+					throw new Exception("Runtime Platform Not Supported");
+			}
 			addInspectionToolbarItem.Clicked += (sender, e) =>
 			{
 				var addInspectionView = new AddInspectionView();

@@ -30,7 +30,18 @@ namespace OnSight
             _notesListView.SetBinding(ListView.ItemsSourceProperty, nameof(_viewModel.VisiblePhotoModelList));
 
             _addPhotoToolbarItem = new ToolbarItem();
-            _addPhotoToolbarItem.Icon = Device.OnPlatform("Add", "Add", "Assets/Add.png");
+			switch (Device.RuntimePlatform)
+			{
+				case Device.iOS:
+				case Device.Android:
+					_addPhotoToolbarItem.Icon = "Add";
+					break;
+				case Device.Windows:
+					_addPhotoToolbarItem.Icon = "Assets/Add.png";
+					break;
+				default:
+					throw new Exception("Runtime Platform Not Supported");
+			}
             ToolbarItems.Add(_addPhotoToolbarItem);
 
             Title = "Photos";

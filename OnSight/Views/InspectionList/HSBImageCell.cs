@@ -1,4 +1,6 @@
-﻿using Xamarin.Forms;
+﻿using System;
+
+using Xamarin.Forms;
 
 namespace OnSight
 {
@@ -11,8 +13,19 @@ namespace OnSight
 			var item = BindingContext as InspectionModel;
 
 			Text = item?.InspectionTitle;
-			ImageSource = Device.OnPlatform("MunichREIcon", "MunichREIcon", "Assets/MunichREIcon.png");
 
-        }
+			switch (Device.RuntimePlatform)
+			{
+				case Device.iOS:
+				case Device.Android:
+					ImageSource = "MunichREIcon";
+					break;
+				case Device.Windows:
+					ImageSource = "Assets/MunichREIcon.png";
+					break;
+				default:
+					throw new Exception("Runtime Platform Not Supported");
+			}
+		}
 	}
 }

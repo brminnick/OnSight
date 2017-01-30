@@ -20,12 +20,34 @@ namespace OnSight
 			BindingContext = _viewModel;
 
 			_saveButton = new ToolbarItem();
-			_saveButton.Icon = Device.OnPlatform("Save", "Save", "Assets/Save.png");
-			_saveButton.SetBinding(ToolbarItem.CommandProperty,nameof(_viewModel.SaveButtonCommand));
+			switch (Device.RuntimePlatform)
+			{
+				case Device.iOS:
+				case Device.Android:
+					_saveButton.Icon = "Save";
+					break;
+				case Device.Windows:
+					_saveButton.Icon = "Assets/Save.png";
+					break;
+				default:
+					throw new Exception("Runtime Platform Not Supported");
+			}
+			_saveButton.SetBinding(ToolbarItem.CommandProperty, nameof(_viewModel.SaveButtonCommand));
 			ToolbarItems.Add(_saveButton);
 
 			var cancelButton = new ToolbarItem();
-			cancelButton.Icon = Device.OnPlatform("Cancel", "Cancel", "Assets/Cancel.png");
+			switch (Device.RuntimePlatform)
+			{
+				case Device.iOS:
+				case Device.Android:
+					cancelButton.Icon = "Cancel";
+					break;
+				case Device.Windows:
+					cancelButton.Icon = "Assets/Cancel.png";
+					break;
+				default:
+					throw new Exception("Runtime Platform Not Supported");
+			}
 			cancelButton.Clicked += (sender, e) => DismissPage();
 			ToolbarItems.Add(cancelButton);
 
@@ -46,18 +68,18 @@ namespace OnSight
 
 			this.SetBinding(TitleProperty, nameof(_viewModel.PhotoImageNameText));
 
-            Content = new ScrollView
-            {
+			Content = new ScrollView
+			{
 
-                Content = new StackLayout
-                {
-                    Children = {
-                    photoImage,
-                    _photoImageNameEntry,
-                    takePhotoButton
-                    }
-                }
-            };
+				Content = new StackLayout
+				{
+					Children = {
+					photoImage,
+					_photoImageNameEntry,
+					takePhotoButton
+					}
+				}
+			};
 		}
 		#endregion
 
