@@ -90,8 +90,6 @@
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
     <None Include="project.json" />
-    <None Include="Assets\Cancel.png" />
-    <None Include="Assets\Save.png" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.xaml.cs">
@@ -111,9 +109,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\Add.png" />
+    <Content Include="Assets\Cancel.png" />
     <Content Include="Assets\HSBLogo.png" />
     <Content Include="Assets\MunichREIcon.png" />
     <Content Include="Assets\MunichRELogo.png" />
+    <Content Include="Assets\Save.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
