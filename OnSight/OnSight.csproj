@@ -35,7 +35,7 @@
     <Compile Include="Pages\InspectionListPage.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\InspectionListViewModel.cs" />
-    <Compile Include="Views\InspectionList\HSBImageCell.cs" />
+    <Compile Include="Views\InspectionList\HSBViewCell.cs" />
     <Compile Include="Models\InspectionModel.cs" />
     <Compile Include="Helpers\DebugHelpers.cs" />
     <Compile Include="Models\PhotoModel.cs" />
