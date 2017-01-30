@@ -100,7 +100,7 @@ namespace OnSight
 			 	Constraint.RelativeToView(_overlayFrame, (parent, view) => view.Y + 15)
 			);
 
-			if (Device.OS == TargetPlatform.Android)
+			if (Device.RuntimePlatform == Device.Android)
 			{
 				_overlayFrame.IsVisible = false;
 				_textEntryButtonStack.BackgroundColor = _whiteWith75Opacity;
