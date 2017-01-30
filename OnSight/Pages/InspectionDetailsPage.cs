@@ -86,13 +86,11 @@ namespace OnSight
 
 			_viewPhotosButton.Clicked -= HandleViewPhotosButtonClicked;
 		}
-		#endregion
-
-
 
 		void HandleViewPhotosButtonClicked(object sender, EventArgs e)
 		{
 			Device.BeginInvokeOnMainThread(async () => await Navigation.PushAsync(new PhotosListPage(_inspectionId)));
 		}
+		#endregion
 	}
 }

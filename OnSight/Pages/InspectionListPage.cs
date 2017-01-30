@@ -36,7 +36,7 @@ namespace OnSight
 									   Constraint.RelativeToParent(parent => parent.Height));
 
 			var addInspectionToolbarItem = new ToolbarItem();
-			addInspectionToolbarItem.Icon = "Add";
+			addInspectionToolbarItem.Icon = Device.OnPlatform("Add","Add","Assets/Add.png");
 			addInspectionToolbarItem.Clicked += (sender, e) =>
 			{
 				var addInspectionView = new AddInspectionView();

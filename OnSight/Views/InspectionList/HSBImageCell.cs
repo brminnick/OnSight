@@ -13,7 +13,8 @@ namespace OnSight
 			var item = BindingContext as InspectionModel;
 
 			Text = item.InspectionTitle;
-			ImageSource = "MunichREIcon";
-		}
+			ImageSource = Device.OnPlatform("MunichREIcon", "MunichREIcon", "Assets/MunichREIcon.png");
+
+        }
 	}
 }
