@@ -8,7 +8,7 @@ namespace OnSight
     {
         #region Constant Fields
         readonly int _inspectionId;
-        readonly ListView _notesListView;
+        readonly ListView _photosListView;
         readonly PhotosListViewModel _viewModel;
         readonly ToolbarItem _addPhotoToolbarItem;
         #endregion
@@ -21,13 +21,14 @@ namespace OnSight
             _viewModel = new PhotosListViewModel(inspectionId);
             BindingContext = _viewModel;
 
-            _notesListView = new ListView
+            _photosListView = new ListView
             {
                 ItemTemplate = new DataTemplate(typeof(PhotoListImageCell)),
                 IsPullToRefreshEnabled = true
             };
-            _notesListView.SetBinding(ListView.RefreshCommandProperty, nameof(_viewModel.RefreshCommand));
-            _notesListView.SetBinding(ListView.ItemsSourceProperty, nameof(_viewModel.VisiblePhotoModelList));
+            _photosListView.SetBinding(ListView.RefreshCommandProperty, nameof(_viewModel.RefreshCommand));
+            _photosListView.SetBinding(ListView.ItemsSourceProperty, nameof(_viewModel.VisiblePhotoModelList));
+            _photosListView.ItemSelected += (sender, e) => _photosListView.SelectedItem = null;
 
             _addPhotoToolbarItem = new ToolbarItem();
 			switch (Device.RuntimePlatform)
@@ -46,7 +47,12 @@ namespace OnSight
 
             Title = "Photos";
 
-            Content = _notesListView;
+            Content = _photosListView;
+        }
+
+        private void _notesListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
         #endregion
 
@@ -58,7 +64,7 @@ namespace OnSight
             _addPhotoToolbarItem.Clicked += HandleAddPhotoToolbarItemClicked;
             _viewModel.PullToRefreshCompleted += HandlePullToRefreshCompleted;
 
-            _notesListView.BeginRefresh();
+            _photosListView.BeginRefresh();
         }
 
         protected override void OnDisappearing()
@@ -71,7 +77,7 @@ namespace OnSight
 
         void HandlePullToRefreshCompleted(object sender, EventArgs e)
         {
-            Device.BeginInvokeOnMainThread(_notesListView.EndRefresh);
+            Device.BeginInvokeOnMainThread(_photosListView.EndRefresh);
         }
 
         void HandleAddPhotoToolbarItemClicked(object sender, EventArgs e)
@@ -86,7 +92,7 @@ namespace OnSight
 
                 await Navigation.PushModalAsync(addPhotoNavigationPage);
 
-                _notesListView.SelectedItem = null;
+                _photosListView.SelectedItem = null;
             });
         }
         #endregion
