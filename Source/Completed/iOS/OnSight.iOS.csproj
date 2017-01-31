@@ -169,9 +169,6 @@
     <BundleResource Include="Resources\Save%402x.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Add.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="CustomRenderers\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />

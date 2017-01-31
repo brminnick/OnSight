@@ -32,24 +32,21 @@ namespace OnSight
 				ColumnSpacing = 10,
 
 				RowDefinitions = {
-					new RowDefinition{ Height = new GridLength (45, GridUnitType.Absolute) },
+					new RowDefinition{ Height = new GridLength(0, GridUnitType.Auto) },
+					new RowDefinition{ Height = new GridLength(0, GridUnitType.Auto) }
+
 				},
 				ColumnDefinitions = {
-					new ColumnDefinition{ Width = new GridLength (45 , GridUnitType.Absolute) },
-					new ColumnDefinition{ Width = new GridLength (1, GridUnitType.Star) }
-				}
-			};
-
-			var labelStack = new StackLayout
-			{
-				Children = {
-					_titleLabel,
-					_titleTextLabel
+					new ColumnDefinition{ Width = new GridLength(0, GridUnitType.Auto) },
+					new ColumnDefinition{ Width = new GridLength(0, GridUnitType.Auto) }
 				}
 			};
 
 			gridLayout.Children.Add(_munichIcon, 0, 0);
-			gridLayout.Children.Add(labelStack, 1, 0);
+			Grid.SetRowSpan(_munichIcon, 2);
+
+			gridLayout.Children.Add(_titleLabel, 1, 0);
+			gridLayout.Children.Add(_titleTextLabel, 1, 1);
 
 			View = gridLayout;
 		}

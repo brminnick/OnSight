@@ -60,11 +60,11 @@ namespace OnSight
 
 			var takePhotoButton = new Button
 			{
-				Text = "Take Photo"
+				Text = "New Photo"
 			};
 			takePhotoButton.SetBinding(Button.CommandProperty, nameof(_viewModel.TakePhotoButtonCommand));
 
-			Padding = new Thickness(20, 10);
+			Padding = new Thickness(40, 10);
 
 			this.SetBinding(TitleProperty, nameof(_viewModel.PhotoImageNameText));
 

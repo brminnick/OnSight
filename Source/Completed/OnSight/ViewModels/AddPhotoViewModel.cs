@@ -140,7 +140,7 @@ namespace OnSight
 			{
 				foreach (PhotoModel photoModel in photoModelList)
 				{
-					if (photoModel.ImageName.Equals($"{defaultPhotoNumber}{defaultPhotoNumber}"))
+					if (photoModel.ImageName.Equals($"{defaultPhotoText} {defaultPhotoNumber}"))
 						defaultPhotoNumber++;
 				}
 			}
@@ -150,6 +150,9 @@ namespace OnSight
 
 		void UpdatePhotoImageSource()
 		{
+			if (PhotoMediaFile == null)
+				return;
+			
 			PhotoImageSource = ImageSource.FromStream(PhotoMediaFile.GetStream);
 		}
 
