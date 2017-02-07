@@ -1,12 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
 
-using Plugin.Media.Abstractions;
 using Plugin.Media;
-using System.Linq;
+using Plugin.Media.Abstractions;
 
 namespace OnSight
 {
