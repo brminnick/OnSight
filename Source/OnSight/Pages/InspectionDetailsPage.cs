@@ -31,6 +31,7 @@ namespace OnSight
 			{
 				BackgroundColor = ColorConstants.EditorBackgroundColor
 			};
+
 			notesEditor.SetBinding(Editor.TextProperty, nameof(_viewModel.NotesText));
 
 			_viewPhotosButton = new Button
