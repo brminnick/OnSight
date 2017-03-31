@@ -22,7 +22,7 @@ namespace OnSight
 
 			_listView = new ListView(ListViewCachingStrategy.RecycleElement)
 			{
-				ItemTemplate = new DataTemplate(typeof(HSBViewCell)),
+				ItemTemplate = new DataTemplate(typeof(InspectionListViewCell)),
 				IsPullToRefreshEnabled = true,
 				SeparatorVisibility = SeparatorVisibility.None,
                 RowHeight = 50

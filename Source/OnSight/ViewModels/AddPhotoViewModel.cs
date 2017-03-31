@@ -3,10 +3,13 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Microsoft.ProjectOxford.Vision;
+
 using Xamarin.Forms;
 
 using Plugin.Media;
 using Plugin.Media.Abstractions;
+using Microsoft.ProjectOxford.Vision.Contract;
 
 namespace OnSight
 {
@@ -18,6 +21,7 @@ namespace OnSight
 
 		#region Fields
 		string _photoNameText;
+		bool _isAnalyzingPhoto;
 		Command _takePhotoButtonCommand, _saveButtonCommand;
 		ImageSource _photoImageSource;
 		MediaFile _photoMediaFile;
@@ -51,17 +55,24 @@ namespace OnSight
 			set { SetProperty(ref _photoNameText, value); }
 		}
 
-		public MediaFile PhotoMediaFile
+		public bool IsValidatingPhoto
+		{
+			get { return _isAnalyzingPhoto; }
+			set { SetProperty(ref _isAnalyzingPhoto, value); }
+		}
+
+		MediaFile PhotoMediaFile
 		{
 			get { return _photoMediaFile; }
-			set { SetProperty(ref _photoMediaFile, value, UpdatePhotoImageSource); }
+			set { SetProperty(ref _photoMediaFile, value, async () => await UpdatePhotoImageSource()); }
 		}
 		#endregion
 
 		#region Events
-		public event EventHandler DisplayNoCameraAvailableAlert;
 		public event EventHandler DuplicateImageNameDetected;
+		public event EventHandler DisplayNoCameraAvailableAlert;
 		public event EventHandler PhotoSavedToDatabaseCompleted;
+		public event EventHandler<InvalidPhotoEventArgs> DisplayInvalidPhotoAlert;
 		#endregion
 
 		#region Methods
@@ -72,18 +83,23 @@ namespace OnSight
 
 		async Task ExecuteSaveButtonCommand()
 		{
+			if (IsValidatingPhoto)
+				return;
+
 			var photoModelList = await InspectionModelDatabase.GetAllPhotosForInspection(_inspectionId);
 
 			var doesPhotoImageNameTextExist = photoModelList?.FirstOrDefault(x => x.ImageName.Equals(PhotoImageNameText)) != null;
 
-			if (doesPhotoImageNameTextExist)
+			switch (doesPhotoImageNameTextExist)
 			{
-				OnDuplicateImageNameDetected();
-			}
-			else
-			{
-				await SavePhotoToDatabase();
-				OnPhotoSavedToDatabaseCompleted();
+				case true:
+					OnDuplicateImageNameDetected();
+					break;
+
+				case false:
+					await SavePhotoToDatabase();
+					OnPhotoSavedToDatabaseCompleted();
+					break;
 			}
 		}
 
@@ -148,28 +164,89 @@ namespace OnSight
 			return $"{defaultPhotoText} {defaultPhotoNumber}";
 		}
 
-		void UpdatePhotoImageSource()
+		async Task UpdatePhotoImageSource()
 		{
 			if (PhotoMediaFile == null)
 				return;
-			
+
 			PhotoImageSource = ImageSource.FromStream(PhotoMediaFile.GetStream);
+
+			await ValidatePhoto();
 		}
 
-		void OnDisplayNoCameraAvailableAlert()
+		Stream GetPhotoStream(MediaFile mediaFile, bool disposeMediaFile)
 		{
-			DisplayNoCameraAvailableAlert?.Invoke(null, EventArgs.Empty);
+			var stream = mediaFile.GetStream();
+
+			if (disposeMediaFile)
+				mediaFile.Dispose();
+
+			return stream;
 		}
 
-		void OnDuplicateImageNameDetected()
+		async Task ValidatePhoto()
 		{
-			DuplicateImageNameDetected?.Invoke(null, EventArgs.Empty);
+			IsValidatingPhoto = true;
+
+			var visionClient = new VisionServiceClient(CognitiveServicesConstants.VisionAPIKey);
+			var visualFeatures = new VisualFeature[]
+			{
+				VisualFeature.Adult,
+				VisualFeature.Description,
+				VisualFeature.Tags
+			};
+
+			AnalysisResult imageAnalysisResult;
+			bool invalidAPIKey = false, internetConnectionFailed = false, isImageRacyOrContainAdultContent, doesImageContainAcceptablePhotoTags;
+			try
+			{
+				imageAnalysisResult = await visionClient.AnalyzeImageAsync(GetPhotoStream(PhotoMediaFile, false), visualFeatures);
+			}
+			catch (Exception e)
+			{
+				DebugHelpers.PrintException(e);
+
+				imageAnalysisResult = null;
+
+				if ((e is ClientException) && ((ClientException)e).HttpStatus == System.Net.HttpStatusCode.Unauthorized)
+					invalidAPIKey = true;
+				else
+					internetConnectionFailed = true;
+			}
+
+			isImageRacyOrContainAdultContent = (imageAnalysisResult?.Adult.IsAdultContent ?? false) || (imageAnalysisResult?.Adult.IsRacyContent ?? false);
+			doesImageContainAcceptablePhotoTags = imageAnalysisResult?.Description.Tags.Intersect(CognitiveServicesConstants.AcceptablePhotoTags).Any() ?? false;
+
+			if (isImageRacyOrContainAdultContent 
+			    || !doesImageContainAcceptablePhotoTags 
+			    || invalidAPIKey 
+			    || internetConnectionFailed)
+			{
+				OnDisplayInvalidPhotoAlert(isImageRacyOrContainAdultContent, doesImageContainAcceptablePhotoTags, invalidAPIKey, internetConnectionFailed);
+				PhotoMediaFile.Dispose();
+				PhotoImageSource = null;
+			}
+
+			IsValidatingPhoto = false;
 		}
 
-		void OnPhotoSavedToDatabaseCompleted()
-		{
-			PhotoSavedToDatabaseCompleted?.Invoke(null, EventArgs.Empty);
-		}
+
+		void OnDisplayInvalidPhotoAlert(
+			bool isImageInappropriate,
+			bool doesImageContainAcceptablePhotoTags,
+			bool invalidAPIKey,
+			bool internetConnectionFailed
+		) =>
+			DisplayInvalidPhotoAlert?.Invoke(this, new InvalidPhotoEventArgs(isImageInappropriate, doesImageContainAcceptablePhotoTags, invalidAPIKey, internetConnectionFailed));
+
+		void OnDisplayNoCameraAvailableAlert() =>
+			DisplayNoCameraAvailableAlert?.Invoke(this, EventArgs.Empty);
+
+		void OnDuplicateImageNameDetected() =>
+			DuplicateImageNameDetected?.Invoke(this, EventArgs.Empty);
+
+		void OnPhotoSavedToDatabaseCompleted() =>
+			PhotoSavedToDatabaseCompleted?.Invoke(this, EventArgs.Empty);
 		#endregion
 	}
 }

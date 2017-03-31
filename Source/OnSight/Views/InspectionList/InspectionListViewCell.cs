@@ -4,26 +4,25 @@ using Xamarin.Forms;
 
 namespace OnSight
 {
-	public class HSBViewCell : ViewCell
+	public class InspectionListViewCell : ViewCell
 	{
 		#region Fields
-		Image _munichIcon;
+		Image _icon;
 		Label _titleLabel;
-		Label _titleTextLabel;
+		Label _descriptionLabel;
 		#endregion
 
 		#region Constructors
-		public HSBViewCell()
+		public InspectionListViewCell()
 		{
-			_munichIcon = new Image();
+			_icon = new Image();
 
 			_titleLabel = new Label
 			{
 				FontAttributes = FontAttributes.Bold,
-				Text = "Title"
 			};
 
-			_titleTextLabel = new Label();
+			_descriptionLabel = new Label();
 
 			var gridLayout = new Grid
 			{
@@ -42,11 +41,11 @@ namespace OnSight
 				}
 			};
 
-			gridLayout.Children.Add(_munichIcon, 0, 0);
-			Grid.SetRowSpan(_munichIcon, 2);
+			gridLayout.Children.Add(_icon, 0, 0);
+			Grid.SetRowSpan(_icon, 2);
 
 			gridLayout.Children.Add(_titleLabel, 1, 0);
-			gridLayout.Children.Add(_titleTextLabel, 1, 1);
+			gridLayout.Children.Add(_descriptionLabel, 1, 1);
 
 			View = gridLayout;
 		}
@@ -58,16 +57,17 @@ namespace OnSight
 
 			var item = BindingContext as InspectionModel;
 
-			_titleTextLabel.Text = item?.InspectionTitle;
+			_titleLabel.Text = item?.InspectionTitle;
+			_descriptionLabel.Text = item?.InspectionDateUTC.Date.ToString("MMMMM dd yyyy");
 
 			switch (Device.RuntimePlatform)
 			{
 				case Device.iOS:
 				case Device.Android:
-					_munichIcon.Source = "MunichREIcon";
+					_icon.Source = "MunichREIcon";
 					break;
 				case Device.Windows:
-					_munichIcon.Source = "Assets/MunichREIcon.png";
+					_icon.Source = "Assets/MunichREIcon.png";
 					break;
 				default:
 					throw new Exception("Runtime Platform Not Supported");

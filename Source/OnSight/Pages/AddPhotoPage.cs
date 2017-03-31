@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
+using System.Text;
 
 namespace OnSight
 {
@@ -18,6 +19,29 @@ namespace OnSight
 		{
 			_viewModel = new AddPhotoViewModel(inspectionId);
 			BindingContext = _viewModel;
+
+			var validatingPhotoLabel = new Label
+			{
+				Text = "Validating Photo",
+				HorizontalTextAlignment = TextAlignment.Center
+			};
+			validatingPhotoLabel.SetBinding(IsVisibleProperty, nameof(_viewModel.IsValidatingPhoto));
+
+			var validatingPhotoActivityIndicator = new ActivityIndicator();
+			validatingPhotoActivityIndicator.SetBinding(IsVisibleProperty, nameof(_viewModel.IsValidatingPhoto));
+			validatingPhotoActivityIndicator.SetBinding(ActivityIndicator.IsRunningProperty, nameof(_viewModel.IsValidatingPhoto));
+
+			var validatingPhotoFrame = new Frame
+			{
+				Content = new StackLayout
+				{
+					Children = {
+						validatingPhotoLabel,
+						validatingPhotoActivityIndicator
+					}
+				}
+			};
+			validatingPhotoFrame.SetBinding(IsVisibleProperty, nameof(_viewModel.IsValidatingPhoto));
 
 			_saveButton = new ToolbarItem();
 			switch (Device.RuntimePlatform)
@@ -68,18 +92,22 @@ namespace OnSight
 
 			this.SetBinding(TitleProperty, nameof(_viewModel.PhotoImageNameText));
 
-			Content = new ScrollView
+			var gridLayout = new Grid
 			{
-
-				Content = new StackLayout
-				{
-					Children = {
-					photoImage,
-					_photoImageNameEntry,
-					takePhotoButton
-					}
+				ColumnDefinitions = { new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) } },
+				RowDefinitions = {
+					new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+					new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+					new RowDefinition { Height = new GridLength(300, GridUnitType.Absolute) }
 				}
 			};
+
+			gridLayout.Children.Add(_photoImageNameEntry, 0, 0);
+			gridLayout.Children.Add(takePhotoButton, 0, 1);
+			gridLayout.Children.Add(photoImage, 0, 2);
+			gridLayout.Children.Add(validatingPhotoFrame, 0, 2);
+
+			Content = gridLayout;
 		}
 		#endregion
 
@@ -91,6 +119,7 @@ namespace OnSight
 			_viewModel.PhotoSavedToDatabaseCompleted += HandlePhotoSavedToDatabaseCompleted;
 			_viewModel.DisplayNoCameraAvailableAlert += HandleDisplayNoCameraAvailableAlert;
 			_viewModel.DuplicateImageNameDetected += HandleDuplicateImageNameDetected;
+			_viewModel.DisplayInvalidPhotoAlert += HandleDisplayInvalidPhotoAlert;
 		}
 
 		protected override void OnDisappearing()
@@ -100,6 +129,7 @@ namespace OnSight
 			_viewModel.PhotoSavedToDatabaseCompleted -= HandlePhotoSavedToDatabaseCompleted;
 			_viewModel.DisplayNoCameraAvailableAlert -= HandleDisplayNoCameraAvailableAlert;
 			_viewModel.DuplicateImageNameDetected -= HandleDuplicateImageNameDetected;
+			_viewModel.DisplayInvalidPhotoAlert -= HandleDisplayInvalidPhotoAlert;
 		}
 
 		void HandleDuplicateImageNameDetected(object sender, EventArgs e)
@@ -112,10 +142,27 @@ namespace OnSight
 			Device.BeginInvokeOnMainThread(() => DisplayAlert("Error", "Camera Unavailable", "Ok"));
 		}
 
+		void HandleDisplayInvalidPhotoAlert(object sender, InvalidPhotoEventArgs e)
+		{
+			var errorString = new StringBuilder();
+
+			if (e.InvalidAPIKey)
+				errorString.AppendLine("Invalid API Key");
+			if (e.InternetConnectionFailed)
+				errorString.AppendLine("Internet Connection Failed");
+			if (!e.DoesImageContainAcceptablePhotoTags)
+				errorString.AppendLine("No Plant Detected");
+			if (e.IsImageInappropriate)
+				errorString.AppendLine("Inaproproate Image Detected");
+
+			Device.BeginInvokeOnMainThread(() => DisplayAlert("Error", errorString.ToString(), "Ok"));
+		}
+
 		void HandlePhotoSavedToDatabaseCompleted(object sender, EventArgs e)
 		{
 			DismissPage();
 		}
+
 
 		void DismissPage()
 		{

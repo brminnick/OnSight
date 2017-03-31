@@ -7,7 +7,6 @@
 		public const double AddInspectionViewMaxSize = 1.1;
 		public const double AddInspectionViewNormalSize = 1;
 		#endregion
-
 	}
 }
 
