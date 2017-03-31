@@ -188,6 +188,9 @@ namespace OnSight
 		{
 			IsValidatingPhoto = true;
 
+			AnalysisResult imageAnalysisResult;
+			bool invalidAPIKey = false, internetConnectionFailed = false, isImageRacyOrContainAdultContent, doesImageContainAcceptablePhotoTags;
+
 			var visionClient = new VisionServiceClient(CognitiveServicesConstants.VisionAPIKey);
 			var visualFeatures = new VisualFeature[]
 			{
@@ -196,8 +199,6 @@ namespace OnSight
 				VisualFeature.Tags
 			};
 
-			AnalysisResult imageAnalysisResult;
-			bool invalidAPIKey = false, internetConnectionFailed = false, isImageRacyOrContainAdultContent, doesImageContainAcceptablePhotoTags;
 			try
 			{
 				imageAnalysisResult = await visionClient.AnalyzeImageAsync(GetPhotoStream(PhotoMediaFile, false), visualFeatures);
@@ -214,8 +215,8 @@ namespace OnSight
 					internetConnectionFailed = true;
 			}
 
-			isImageRacyOrContainAdultContent = (imageAnalysisResult?.Adult.IsAdultContent ?? false) || (imageAnalysisResult?.Adult.IsRacyContent ?? false);
-			doesImageContainAcceptablePhotoTags = imageAnalysisResult?.Description.Tags.Intersect(CognitiveServicesConstants.AcceptablePhotoTags).Any() ?? false;
+			isImageRacyOrContainAdultContent = (imageAnalysisResult?.Adult?.IsAdultContent ?? false) || (imageAnalysisResult?.Adult.IsRacyContent ?? false);
+			doesImageContainAcceptablePhotoTags = imageAnalysisResult?.Description?.Tags?.Intersect(CognitiveServicesConstants.AcceptablePhotoTags)?.Any() ?? false;
 
 			if (isImageRacyOrContainAdultContent 
 			    || !doesImageContainAcceptablePhotoTags 

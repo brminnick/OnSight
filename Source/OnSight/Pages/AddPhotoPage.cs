@@ -33,6 +33,8 @@ namespace OnSight
 
 			var validatingPhotoFrame = new Frame
 			{
+				HorizontalOptions = LayoutOptions.Center,
+				VerticalOptions = LayoutOptions.Center,
 				Content = new StackLayout
 				{
 					Children = {
