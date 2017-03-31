@@ -1,15 +1,15 @@
 ﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
-using System.Text;
 
 namespace OnSight
 {
 	public class AddPhotoPage : ContentPage
 	{
 		#region Constant Fields
-		AddPhotoViewModel _viewModel;
+		readonly AddPhotoViewModel _viewModel;
 		readonly ToolbarItem _saveButton;
 		readonly Entry _photoImageNameEntry;
 		#endregion
@@ -155,7 +155,7 @@ namespace OnSight
 			if (!e.DoesImageContainAcceptablePhotoTags)
 				errorString.AppendLine("No Plant Detected");
 			if (e.IsImageInappropriate)
-				errorString.AppendLine("Inaproproate Image Detected");
+				errorString.AppendLine("Inappropriate Image Detected");
 
 			Device.BeginInvokeOnMainThread(() => DisplayAlert("Error", errorString.ToString(), "Ok"));
 		}
