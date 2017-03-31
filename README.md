@@ -5,5 +5,4 @@ OnSight was created to help field technician inspections. It allows the technici
 
 This app utilizes an MVVM Architecture and incorporates a local SQLite Database. It also uses the Computer Vision API hosted by Microsoft Cognitive Services to ensure the photo is valid.
 
-
 ![iPhone Gif](Artwork/Demo.gif)
