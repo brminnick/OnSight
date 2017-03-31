@@ -166,12 +166,10 @@
     <Compile Include="CustomRenderers\ViewCellCustomRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <BundleResource Include="Resources\HSBLogo.png" />
-    <BundleResource Include="Resources\MunichRELogo.png" />
     <BundleResource Include="Resources\Add%402x.png" />
-    <BundleResource Include="Resources\MunichREIcon%402x.png" />
     <BundleResource Include="Resources\Cancel%402x.png" />
     <BundleResource Include="Resources\Save%402x.png" />
+    <BundleResource Include="Resources\UniversalLeafLogo%402x.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CustomRenderers\" />

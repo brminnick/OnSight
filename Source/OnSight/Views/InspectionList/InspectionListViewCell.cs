@@ -64,10 +64,10 @@ namespace OnSight
 			{
 				case Device.iOS:
 				case Device.Android:
-					_icon.Source = "MunichREIcon";
+					_icon.Source = "UniversalLeafLogo";
 					break;
 				case Device.Windows:
-					_icon.Source = "Assets/MunichREIcon.png";
+					_icon.Source = "Assets/UniversalLeafLogo.png";
 					break;
 				default:
 					throw new Exception("Runtime Platform Not Supported");

@@ -150,11 +150,9 @@
     <AndroidResource Include="Resources\drawable-xhdpi\icon.png" />
     <AndroidResource Include="Resources\drawable-xxhdpi\icon.png" />
     <AndroidResource Include="Resources\drawable-xxhdpi\Add.png" />
-    <AndroidResource Include="Resources\drawable-xxhdpi\HSBLogo.png" />
-    <AndroidResource Include="Resources\drawable-xxhdpi\MunichRELogo.png" />
-    <AndroidResource Include="Resources\drawable-xxhdpi\MunichREIcon.png" />
     <AndroidResource Include="Resources\drawable-xxhdpi\Cancel.png" />
     <AndroidResource Include="Resources\drawable-xxhdpi\Save.png" />
+    <AndroidResource Include="Resources\drawable-xxhdpi\UniversalLeafLogo.png" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

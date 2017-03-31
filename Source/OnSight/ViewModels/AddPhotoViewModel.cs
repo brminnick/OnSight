@@ -195,8 +195,7 @@ namespace OnSight
 			var visualFeatures = new VisualFeature[]
 			{
 				VisualFeature.Adult,
-				VisualFeature.Description,
-				VisualFeature.Tags
+				VisualFeature.Description
 			};
 
 			try

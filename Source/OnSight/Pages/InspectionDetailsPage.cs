@@ -40,6 +40,7 @@ namespace OnSight
 			};
 
 			this.SetBinding(TitleProperty, nameof(_viewModel.TitleText));
+			NavigationPage.SetBackButtonTitle(this, "");
 
 			Padding = new Thickness(20, 10);
 
