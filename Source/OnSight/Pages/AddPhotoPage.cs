@@ -86,7 +86,7 @@ namespace OnSight
 
 			var takePhotoButton = new Button
 			{
-				Text = "New Photo"
+				Text = "New Plant Photo"
 			};
 			takePhotoButton.SetBinding(Button.CommandProperty, nameof(_viewModel.TakePhotoButtonCommand));
 
