@@ -23,7 +23,6 @@ namespace OnSight
 		public AddInspectionView()
 		{
 			const string titleText = "New Inspection";
-			const string bodyText = "Title of Inspection";
 			const string submitButtonText = "Submit";
 
 			_backgroundOverlayBoxView = new BoxView
@@ -31,13 +30,6 @@ namespace OnSight
 				BackgroundColor = _whiteWith75Opacity
 			};
 			_backgroundOverlayBoxView.Opacity = 0;
-
-			_overlayFrame = new Frame
-			{
-				HasShadow = true,
-				BackgroundColor = Color.White
-			};
-			_overlayFrame.Scale = 0;
 
 			var titleLabel = new Label
 			{
@@ -77,10 +69,17 @@ namespace OnSight
 			};
 			_textEntryButtonStack.Scale = 0;
 
-			_relativeLayout = new RelativeLayout();
-			Func<RelativeLayout, double> gettextAndButtonStackHeight = (p) => _textEntryButtonStack.Measure(_relativeLayout.Width, _relativeLayout.Height).Request.Height;
-			Func<RelativeLayout, double> gettextAndButtonStackWidth = (p) => _textEntryButtonStack.Measure(_relativeLayout.Width, _relativeLayout.Height).Request.Width;
+			_overlayFrame = new Frame
+			{
+				HasShadow = true,
+				BackgroundColor = Color.White,
+                Content = _textEntryButtonStack
+			};
+			_overlayFrame.Scale = 0;
 
+			_relativeLayout = new RelativeLayout();
+			Func<RelativeLayout, double> getOverlayFrameHeight = (p) => _overlayFrame.Measure(p.Width, p.Height).Request.Height;
+			Func<RelativeLayout, double> getOverlayFrameWidth = (p) => _overlayFrame.Measure(p.Width, p.Height).Request.Width;
 
 			_relativeLayout.Children.Add(_backgroundOverlayBoxView,
 			   	Constraint.Constant(-10),
@@ -89,22 +88,11 @@ namespace OnSight
 				Constraint.RelativeToParent(parent => parent.Height)
 		   	);
 			_relativeLayout.Children.Add(_overlayFrame,
-				Constraint.RelativeToParent(parent => parent.Width / 2 - gettextAndButtonStackWidth(parent) / 2 - 20),
-                Constraint.RelativeToParent(parent => parent.Y +20),
-			   	Constraint.RelativeToParent(parent => gettextAndButtonStackWidth(parent) + 30),
-				Constraint.RelativeToParent(parent => gettextAndButtonStackHeight(parent) + 30)
-		  	);
-
-			_relativeLayout.Children.Add(_textEntryButtonStack,
-			 	Constraint.RelativeToView(_overlayFrame, (parent, view) => view.X + 15),
-			 	Constraint.RelativeToView(_overlayFrame, (parent, view) => view.Y + 15)
+				Constraint.RelativeToParent(parent => parent.Width / 2 - getOverlayFrameWidth(parent) / 2 - 25),
+                Constraint.RelativeToParent(parent =>parent.Height / 4 - getOverlayFrameHeight(parent) / 2),
+				Constraint.RelativeToParent(parent => getOverlayFrameWidth(parent) + 50),
+				Constraint.RelativeToParent(parent => getOverlayFrameHeight(parent) + 40)
 			);
-
-			if (Device.RuntimePlatform == Device.Android)
-			{
-				_overlayFrame.IsVisible = false;
-				_textEntryButtonStack.BackgroundColor = _whiteWith75Opacity;
-			}
 
 			Content = _relativeLayout;
 		}

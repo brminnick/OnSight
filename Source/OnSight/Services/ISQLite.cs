@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-using SQLite;
+﻿using SQLite;
 
 namespace OnSight
 {

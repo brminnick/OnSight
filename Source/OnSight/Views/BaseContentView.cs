@@ -1,5 +1,5 @@
-﻿using System;
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
+
 namespace OnSight
 {
 	public class BaseContentView<T> : ContentView where T : BaseViewModel

@@ -28,21 +28,20 @@ namespace OnSight
             };
             _photosListView.SetBinding(ListView.RefreshCommandProperty, nameof(_viewModel.RefreshCommand));
             _photosListView.SetBinding(ListView.ItemsSourceProperty, nameof(_viewModel.VisiblePhotoModelList));
-            _photosListView.ItemSelected += (sender, e) => _photosListView.SelectedItem = null;
 
             _addPhotoToolbarItem = new ToolbarItem();
-			switch (Device.RuntimePlatform)
-			{
-				case Device.iOS:
-				case Device.Android:
-					_addPhotoToolbarItem.Icon = "Add";
-					break;
-				case Device.Windows:
-					_addPhotoToolbarItem.Icon = "Assets/Add.png";
-					break;
-				default:
-					throw new Exception("Runtime Platform Not Supported");
-			}
+            switch (Device.RuntimePlatform)
+            {
+                case Device.iOS:
+                case Device.Android:
+                    _addPhotoToolbarItem.Icon = "Add";
+                    break;
+                case Device.Windows:
+                    _addPhotoToolbarItem.Icon = "Assets/Add.png";
+                    break;
+                default:
+                    throw new Exception("Runtime Platform Not Supported");
+            }
             ToolbarItems.Add(_addPhotoToolbarItem);
 
             Title = "Photos";
@@ -56,6 +55,7 @@ namespace OnSight
         {
             base.OnAppearing();
 
+            _photosListView.ItemSelected += HandleItemSelected;
             _addPhotoToolbarItem.Clicked += HandleAddPhotoToolbarItemClicked;
             _viewModel.PullToRefreshCompleted += HandlePullToRefreshCompleted;
 
@@ -66,14 +66,16 @@ namespace OnSight
         {
             base.OnDisappearing();
 
+            _photosListView.ItemSelected -= HandleItemSelected;
             _addPhotoToolbarItem.Clicked -= HandleAddPhotoToolbarItemClicked;
             _viewModel.PullToRefreshCompleted -= HandlePullToRefreshCompleted;
         }
 
-        void HandlePullToRefreshCompleted(object sender, EventArgs e)
-        {
+        void HandlePullToRefreshCompleted(object sender, EventArgs e) =>
             Device.BeginInvokeOnMainThread(_photosListView.EndRefresh);
-        }
+
+        void HandleItemSelected(object sender, SelectedItemChangedEventArgs e) =>
+            _photosListView.SelectedItem = null;
 
         void HandleAddPhotoToolbarItemClicked(object sender, EventArgs e)
         {

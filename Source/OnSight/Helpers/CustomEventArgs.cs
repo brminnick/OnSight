@@ -3,7 +3,9 @@ namespace OnSight
 {
 	public class InvalidPhotoEventArgs : EventArgs
 	{
-		readonly bool _isImageInappropriate, _doesImageContainAcceptablePhotoTags, _invalidAPIKey, _internetConnectionFailed;
+		readonly bool _isImageInappropriate, 
+            _doesImageContainAcceptablePhotoTags, 
+            _invalidAPIKey, _internetConnectionFailed;
 
 		public InvalidPhotoEventArgs(
 			bool isImageInappropriate,

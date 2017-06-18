@@ -4,13 +4,12 @@ namespace OnSight
 {
 	public class PhotoListImageCell : ImageCell
 	{
-
 		public PhotoListImageCell()
 		{
-			var bindingContext = BindingContext as PhotoModel;
+            var photoMoel = BindingContext as PhotoModel;
 
-			this.SetBinding(TextProperty, nameof(bindingContext.ImageName));
-			this.SetBinding(ImageSourceProperty, nameof(bindingContext.ImageSource));
+			this.SetBinding(TextProperty, nameof(photoMoel.ImageName));
+			this.SetBinding(ImageSourceProperty, nameof(photoMoel.ImageSource));
 		}
 	}
 }

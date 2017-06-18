@@ -4,144 +4,141 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Microsoft.ProjectOxford.Vision;
+using Microsoft.ProjectOxford.Vision.Contract;
 
 using Xamarin.Forms;
 
 using Plugin.Media;
 using Plugin.Media.Abstractions;
-using Microsoft.ProjectOxford.Vision.Contract;
 
 namespace OnSight
 {
-	public class AddPhotoViewModel : BaseViewModel
-	{
-		#region Constant Fields
-		readonly int _inspectionId;
-		#endregion
+    public class AddPhotoViewModel : BaseViewModel
+    {
+        #region Constant Fields
+        readonly int _inspectionId;
+        #endregion
 
-		#region Fields
-		string _photoNameText;
-		bool _isAnalyzingPhoto;
-		Command _takePhotoButtonCommand, _saveButtonCommand;
-		ImageSource _photoImageSource;
-		MediaFile _photoMediaFile;
-		#endregion
+        #region Fields
+        string _photoNameText;
+        bool _isAnalyzingPhoto;
+        Command _takePhotoButtonCommand, _saveButtonCommand;
+        ImageSource _photoImageSource;
+        MediaFile _photoMediaFile;
+        #endregion
 
-		#region Constructors
-		public AddPhotoViewModel(int inspectionId)
-		{
-			_inspectionId = inspectionId;
+        #region Constructors
+        public AddPhotoViewModel(int inspectionId)
+        {
+            _inspectionId = inspectionId;
 
-			Task.Run(async () => PhotoImageNameText = await GenerateDefaultPhotoName());
-		}
-		#endregion
+            Task.Run(async () => PhotoImageNameText = await GenerateDefaultPhotoName());
+        }
+        #endregion
 
-		#region Properties
-		public Command SaveButtonCommand => _saveButtonCommand ??
-			(_saveButtonCommand = new Command(async () => await ExecuteSaveButtonCommand()));
+        #region Properties
+        public Command SaveButtonCommand => _saveButtonCommand ??
+            (_saveButtonCommand = new Command(async () => await ExecuteSaveButtonCommand()));
 
-		public Command TakePhotoButtonCommand => _takePhotoButtonCommand ??
-			(_takePhotoButtonCommand = new Command(async () => await ExecuteTakePhotoButtonCommand()));
+        public Command TakePhotoButtonCommand => _takePhotoButtonCommand ??
+            (_takePhotoButtonCommand = new Command(async () => await ExecuteTakePhotoButtonCommand()));
 
-		public ImageSource PhotoImageSource
-		{
-			get { return _photoImageSource; }
-			set { SetProperty(ref _photoImageSource, value); }
-		}
+        public ImageSource PhotoImageSource
+        {
+            get => _photoImageSource;
+            set => SetProperty(ref _photoImageSource, value);
+        }
 
-		public string PhotoImageNameText
-		{
-			get { return _photoNameText; }
-			set { SetProperty(ref _photoNameText, value); }
-		}
+        public string PhotoImageNameText
+        {
+            get => _photoNameText;
+            set => SetProperty(ref _photoNameText, value);
+        }
 
-		public bool IsValidatingPhoto
-		{
-			get { return _isAnalyzingPhoto; }
-			set { SetProperty(ref _isAnalyzingPhoto, value); }
-		}
+        public bool IsValidatingPhoto
+        {
+            get => _isAnalyzingPhoto;
+            set => SetProperty(ref _isAnalyzingPhoto, value);
+        }
 
-		MediaFile PhotoMediaFile
-		{
-			get { return _photoMediaFile; }
-			set { SetProperty(ref _photoMediaFile, value, async () => await UpdatePhotoImageSource()); }
-		}
-		#endregion
+        MediaFile PhotoMediaFile
+        {
+            get => _photoMediaFile;
+            set => SetProperty(ref _photoMediaFile, value, async () => await UpdatePhotoImageSource());
+        }
+        #endregion
 
-		#region Events
-		public event EventHandler DuplicateImageNameDetected;
-		public event EventHandler DisplayNoCameraAvailableAlert;
-		public event EventHandler PhotoSavedToDatabaseCompleted;
-		public event EventHandler<InvalidPhotoEventArgs> DisplayInvalidPhotoAlert;
-		#endregion
+        #region Events
+        public event EventHandler DuplicateImageNameDetected;
+        public event EventHandler DisplayNoCameraAvailableAlert;
+        public event EventHandler PhotoSavedToDatabaseCompleted;
+        public event EventHandler<InvalidPhotoEventArgs> DisplayInvalidPhotoAlert;
+        #endregion
 
-		#region Methods
-		async Task ExecuteTakePhotoButtonCommand()
-		{
-			PhotoMediaFile = await GetMediaFileFromCamera("OnSight");
-		}
+        #region Methods
+        async Task ExecuteTakePhotoButtonCommand() =>
+            PhotoMediaFile = await GetMediaFileFromCamera("OnSight");
 
-		async Task ExecuteSaveButtonCommand()
-		{
-			if (IsValidatingPhoto)
-				return;
+        async Task ExecuteSaveButtonCommand()
+        {
+            if (IsValidatingPhoto)
+                return;
 
-			var photoModelList = await InspectionModelDatabase.GetAllPhotosForInspection(_inspectionId);
+            var photoModelList = await PhotoModelDatabase.GetAllPhotosForInspection(_inspectionId);
 
-			var doesPhotoImageNameTextExist = photoModelList?.FirstOrDefault(x => x.ImageName.Equals(PhotoImageNameText)) != null;
+            var doesPhotoImageNameTextExist = photoModelList?.FirstOrDefault(x => x.ImageName.Equals(PhotoImageNameText)) != null;
 
-			switch (doesPhotoImageNameTextExist)
-			{
-				case true:
-					OnDuplicateImageNameDetected();
-					break;
+            switch (doesPhotoImageNameTextExist)
+            {
+                case true:
+                    OnDuplicateImageNameDetected();
+                    break;
 
-				case false:
-					await SavePhotoToDatabase();
-					OnPhotoSavedToDatabaseCompleted();
-					break;
-			}
-		}
+                case false:
+                    await SavePhotoToDatabase();
+                    OnPhotoSavedToDatabaseCompleted();
+                    break;
+            }
+        }
 
-		async Task<MediaFile> GetMediaFileFromCamera(string directory)
-		{
-			await CrossMedia.Current.Initialize();
+        async Task<MediaFile> GetMediaFileFromCamera(string directory)
+        {
+            await CrossMedia.Current.Initialize();
 
-			if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
-			{
-				OnDisplayNoCameraAvailableAlert();
-				return null;
-			}
+            if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
+            {
+                OnDisplayNoCameraAvailableAlert();
+                return null;
+            }
 
-			var mediaFile = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
-			{
-				PhotoSize = PhotoSize.Small,
-				Directory = directory,
-				DefaultCamera = CameraDevice.Rear,
-			});
+            var mediaFile = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
+            {
+                PhotoSize = PhotoSize.Small,
+                Directory = directory,
+                DefaultCamera = CameraDevice.Rear,
+            });
 
-			return mediaFile;
-		}
+            return mediaFile;
+        }
 
-		async Task SavePhotoToDatabase()
-		{
-			var photoModel = new PhotoModel
-			{
-				InspectionModelId = _inspectionId,
-				ImageName = PhotoImageNameText,
-				ImageAsBase64String = ConvertStreamToBase64String(PhotoMediaFile.GetStream())
-			};
+        async Task SavePhotoToDatabase()
+        {
+            var photoModel = new PhotoModel
+            {
+                InspectionModelId = _inspectionId,
+                ImageName = PhotoImageNameText,
+                Image = ConvertStreamToByteArray(PhotoMediaFile.GetStream())
+            };
 
-			await InspectionModelDatabase.SavePhoto(photoModel);
-		}
+            await PhotoModelDatabase.SavePhoto(photoModel);
+        }
 
-		string ConvertStreamToBase64String(Stream stream)
+        byte[] ConvertStreamToByteArray(Stream stream)
 		{
 			using (MemoryStream memoryStream = new MemoryStream())
 			{
 				stream.CopyTo(memoryStream);
-				var imageAsByteArray = memoryStream.ToArray();
-				return Convert.ToBase64String(imageAsByteArray);
+				return memoryStream.ToArray();
 			}
 		}
 
@@ -150,7 +147,7 @@ namespace OnSight
 			int defaultPhotoNumber = 1;
 			string defaultPhotoText = "Photo";
 
-			var photoModelList = await InspectionModelDatabase.GetAllPhotosForInspection(_inspectionId);
+			var photoModelList = await PhotoModelDatabase.GetAllPhotosForInspection(_inspectionId);
 
 			if (photoModelList != null)
 			{
@@ -229,7 +226,6 @@ namespace OnSight
 
 			IsValidatingPhoto = false;
 		}
-
 
 		void OnDisplayInvalidPhotoAlert(
 			bool isImageInappropriate,

@@ -20,7 +20,7 @@ namespace OnSight
 
 		public string ImageName { get; set; }
 
-		public string ImageAsBase64String { get; set; }
+		public byte[] Image { get; set; }
 		#endregion
 
 		#region Methods
@@ -28,12 +28,10 @@ namespace OnSight
 		{
 			try
 			{
-				if (string.IsNullOrEmpty(ImageAsBase64String))
+                if (Image == null)
 					return null;
 
-				var imageByteArray = Convert.FromBase64String(ImageAsBase64String);
-
-				return ImageSource.FromStream(() => new MemoryStream(imageByteArray));
+				return ImageSource.FromStream(() => new MemoryStream(Image));
 			}
 			catch (Exception e)
 			{

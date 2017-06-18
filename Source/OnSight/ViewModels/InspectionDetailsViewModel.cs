@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Windows.Input;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
@@ -13,7 +13,7 @@ namespace OnSight
 
 		#region Fields
 		string _titleText, _notesText = "Notes";
-		Command _saveDataCommand;
+		ICommand _saveDataCommand;
 		InspectionModel _inspectionModel;
 		#endregion
 
@@ -25,32 +25,27 @@ namespace OnSight
 		}
 		#endregion
 
-		#region Events
-
-		#endregion
-
 		#region Properties 
-		public Command SaveDataCommand => _saveDataCommand ??
+		public ICommand SaveDataCommand => _saveDataCommand ??
 			(_saveDataCommand = new Command(async () => await ExecuteSaveDataCommand()));
 
 		public string TitleText
 		{
-			get { return _titleText; }
-			set { SetProperty(ref _titleText, value); }
+			get => _titleText;
+			set => SetProperty(ref _titleText, value);
 		}
 
 		public string NotesText
 		{
-			get { return _notesText; }
-			set { SetProperty(ref _notesText, value); }
+			get => _notesText;
+			set => SetProperty(ref _notesText, value);
 		}
 
 		InspectionModel InspectionModel
 		{
-			get { return _inspectionModel; }
-			set { SetProperty(ref _inspectionModel, value, async () => await UpdateInspectionModel()); }
+			get => _inspectionModel;
+			set => SetProperty(ref _inspectionModel, value, async () => await UpdateInspectionModel());
 		}
-
 		#endregion
 
 		#region Methods

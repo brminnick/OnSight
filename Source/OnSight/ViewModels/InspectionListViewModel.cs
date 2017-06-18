@@ -14,13 +14,6 @@ namespace OnSight
 		List<InspectionModel> _visibleInspectionModelList;
 		#endregion
 
-		#region Constructors
-		public InspectionListViewModel()
-		{
-			Task.Run(async () => await RefreshData());
-		}
-		#endregion
-
 		#region Events
 		public event EventHandler PullToRefreshCompleted;
 		#endregion
@@ -34,14 +27,14 @@ namespace OnSight
 
 		public List<InspectionModel> VisibleInspectionModelList
 		{
-			get { return _visibleInspectionModelList; }
-			set { SetProperty(ref _visibleInspectionModelList, value); }
+			get => _visibleInspectionModelList;
+			set => SetProperty(ref _visibleInspectionModelList, value);
 		}
 
 		public string TitleEntryText
 		{
-			get { return _titleEntryText; }
-			set { SetProperty(ref _titleEntryText, value); }
+			get => _titleEntryText;
+			set => SetProperty(ref _titleEntryText, value);
 		}
 		#endregion
 
@@ -66,20 +59,14 @@ namespace OnSight
 			await RefreshData();
 		}
 
-		async Task RefreshData()
-		{
+		async Task RefreshData() =>
 			VisibleInspectionModelList = await InspectionModelDatabase.GetAllInspectionModelsAsync();
-		}
 
-		async Task DisplayRefreshingIndicator(int indicatorDisplayTimeInMilliseconds)
-		{
+		async Task DisplayRefreshingIndicator(int indicatorDisplayTimeInMilliseconds) =>
 			await Task.Delay(TimeSpan.FromMilliseconds(indicatorDisplayTimeInMilliseconds));
-		}
 
-		void OnPullToRefreshCompleted()
-		{
-			PullToRefreshCompleted?.Invoke(null, EventArgs.Empty);
-		}
+		void OnPullToRefreshCompleted() =>
+			PullToRefreshCompleted?.Invoke(this, EventArgs.Empty);
 		#endregion
 	}
 }
