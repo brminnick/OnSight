@@ -51,7 +51,7 @@ namespace OnSight
                 case Device.Android:
                     _saveButton.Icon = "Save";
                     break;
-                case Device.Windows:
+                case Device.UWP:
                     _saveButton.Icon = "Assets/Save.png";
                     break;
                 default:
@@ -67,7 +67,7 @@ namespace OnSight
                 case Device.Android:
                     _cancelButton.Icon = "Cancel";
                     break;
-                case Device.Windows:
+                case Device.UWP:
                     _cancelButton.Icon = "Assets/Cancel.png";
                     break;
                 default:

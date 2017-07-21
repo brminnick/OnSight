@@ -36,7 +36,7 @@ namespace OnSight
                 case Device.Android:
                     _addPhotoToolbarItem.Icon = "Add";
                     break;
-                case Device.Windows:
+                case Device.UWP:
                     _addPhotoToolbarItem.Icon = "Assets/Add.png";
                     break;
                 default:
