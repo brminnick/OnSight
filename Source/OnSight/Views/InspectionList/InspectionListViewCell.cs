@@ -66,7 +66,7 @@ namespace OnSight
 				case Device.Android:
 					_icon.Source = "UniversalLeafLogo";
 					break;
-				case Device.Windows:
+				case Device.UWP:
 					_icon.Source = "Assets/UniversalLeafLogo.png";
 					break;
 				default:

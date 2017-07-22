@@ -42,7 +42,7 @@ namespace OnSight
 				case Device.Android:
 					addInspectionToolbarItem.Icon = "Add";
 					break;
-				case Device.Windows:
+				case Device.UWP:
 					addInspectionToolbarItem.Icon = "Assets/Add.png";
 					break;
 				default:
