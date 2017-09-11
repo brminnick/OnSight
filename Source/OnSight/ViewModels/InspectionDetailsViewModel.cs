@@ -8,7 +8,7 @@ namespace OnSight
 	public class InspectionDetailsViewModel : BaseViewModel
 	{
 		#region Constant Fields
-		readonly int _inspectionId;
+		readonly string _inspectionId;
 		#endregion
 
 		#region Fields
@@ -18,7 +18,7 @@ namespace OnSight
 		#endregion
 
 		#region Constructors
-		public InspectionDetailsViewModel(int inspectionId)
+		public InspectionDetailsViewModel(string inspectionId)
 		{
 			_inspectionId = inspectionId;
 			Task.Run(async () => await UpdateInspectionModel());
@@ -59,7 +59,7 @@ namespace OnSight
 
 		async Task UpdateInspectionModel()
 		{
-			if (InspectionModel?.Id == _inspectionId)
+            if (InspectionModel?.Id.Equals(_inspectionId) ?? false)
 				return;
 
 			InspectionModel = await InspectionModelDatabase.GetInspectionModelAsync(_inspectionId);

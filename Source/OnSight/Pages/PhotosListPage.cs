@@ -7,14 +7,14 @@ namespace OnSight
     public class PhotosListPage : ContentPage
     {
         #region Constant Fields
-        readonly int _inspectionId;
+        readonly string _inspectionId;
         readonly ListView _photosListView;
         readonly PhotosListViewModel _viewModel;
         readonly ToolbarItem _addPhotoToolbarItem;
         #endregion
 
         #region Constructors
-        public PhotosListPage(int inspectionId)
+        public PhotosListPage(string inspectionId)
         {
             _inspectionId = inspectionId;
 

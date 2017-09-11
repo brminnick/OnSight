@@ -6,13 +6,17 @@ namespace OnSight
 {
 	public class InspectionModel
 	{
-		#region Properties
-		[Unique, AutoIncrement, PrimaryKey]
-		public int Id { get; set; }
+        #region Constructors
+        public InspectionModel() => Id = Guid.NewGuid().ToString();
+#endregion
+
+        #region Properties
+        [Unique, PrimaryKey]
+		public string Id { get; set; }
 
 		public string InspectionTitle { get; set; }
 
-		public DateTime InspectionDateUTC { get; set; }
+		public DateTimeOffset InspectionDateUTC { get; set; }
 
 		public string InspectionNotes { get; set; }
 		#endregion

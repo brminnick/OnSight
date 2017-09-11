@@ -13,7 +13,7 @@ namespace OnSight
             return await databaseConnection?.Table<InspectionModel>()?.ToListAsync();
         }
 
-        public static async Task<InspectionModel> GetInspectionModelAsync(int id)
+        public static async Task<InspectionModel> GetInspectionModelAsync(string id)
         {
             var databaseConnection = await GetDatabaseConnectionAsync();
 

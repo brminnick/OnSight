@@ -16,7 +16,7 @@ namespace OnSight
     public class AddPhotoViewModel : BaseViewModel
     {
         #region Constant Fields
-        readonly int _inspectionId;
+        readonly string _inspectionId;
         #endregion
 
         #region Fields
@@ -28,7 +28,7 @@ namespace OnSight
         #endregion
 
         #region Constructors
-        public AddPhotoViewModel(int inspectionId)
+        public AddPhotoViewModel(string inspectionId)
         {
             _inspectionId = inspectionId;
 

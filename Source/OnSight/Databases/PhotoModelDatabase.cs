@@ -12,14 +12,14 @@ namespace OnSight
 			return await databaseConnection?.InsertOrReplaceAsync(photoModel);
 		}
 
-		public static async Task<PhotoModel> GetPhoto(int id)
+		public static async Task<PhotoModel> GetPhoto(string id)
 		{
 			var databaseConnection = await GetDatabaseConnectionAsync();
 
 			return await databaseConnection?.Table<PhotoModel>()?.Where(x => x.Id.Equals(id))?.FirstOrDefaultAsync();
 		}
 
-		public static async Task<List<PhotoModel>> GetAllPhotosForInspection(int inspectionModelId)
+		public static async Task<List<PhotoModel>> GetAllPhotosForInspection(string inspectionModelId)
 		{
 			var databaseConnection = await GetDatabaseConnectionAsync();
 

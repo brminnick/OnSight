@@ -7,13 +7,13 @@ namespace OnSight
     public class InspectionDetailsPage : ContentPage
     {
         #region Constant Fields
-        readonly int _inspectionId;
+        readonly string _inspectionId;
         readonly Button _viewPhotosButton;
         readonly InspectionDetailsViewModel _viewModel;
         #endregion
 
         #region Constructors
-        public InspectionDetailsPage(int inspectionId)
+        public InspectionDetailsPage(string inspectionId)
         {
             _inspectionId = inspectionId;
 

@@ -14,7 +14,7 @@ namespace OnSight
         #endregion
 
         #region Constructors
-        public AddPhotoPage(int inspectionId)
+        public AddPhotoPage(string inspectionId)
         {
             _viewModel = new AddPhotoViewModel(inspectionId);
             BindingContext = _viewModel;
@@ -147,6 +147,8 @@ namespace OnSight
             if (e.IsImageInappropriate)
                 errorString.AppendLine("Inappropriate Image Detected");
 
+            errorString.Remove(errorString.Length - 1, 1);
+
             Device.BeginInvokeOnMainThread(() => DisplayAlert("Error", errorString.ToString(), "Ok"));
         }
 
@@ -159,8 +161,7 @@ namespace OnSight
         void HandlePhotoSavedToDatabaseCompleted(object sender, EventArgs e) =>
             DismissPage();
 
-        void HandleCancelButtonClicked(object sender, EventArgs e) =>
-            DismissPage();
+        void HandleCancelButtonClicked(object sender, EventArgs e) => DismissPage();
 
         void DismissPage() =>
             Device.BeginInvokeOnMainThread(async () => await Navigation.PopModalAsync());

@@ -7,38 +7,42 @@ using Xamarin.Forms;
 
 namespace OnSight
 {
-	public class PhotoModel
-	{
-		#region Properties
-		[Ignore]
-		public ImageSource ImageSource => GetImageSource();
+    public class PhotoModel
+    {
+        #region Constructors
+        public PhotoModel() => Id = Guid.NewGuid().ToString();
+        #endregion
 
-		[Unique, AutoIncrement, PrimaryKey]
-		public int Id { get; set; }
+        #region Properties
+        [Ignore]
+        public ImageSource ImageSource => GetImageSource();
 
-		public int InspectionModelId { get; set; }
+        [Unique, PrimaryKey]
+        public string Id { get; set; }
 
-		public string ImageName { get; set; }
+        public string InspectionModelId { get; set; }
 
-		public byte[] Image { get; set; }
-		#endregion
+        public string ImageName { get; set; }
 
-		#region Methods
-		ImageSource GetImageSource()
-		{
-			try
-			{
+        public byte[] Image { get; set; }
+        #endregion
+
+        #region Methods
+        ImageSource GetImageSource()
+        {
+            try
+            {
                 if (Image == null)
-					return null;
+                    return null;
 
-				return ImageSource.FromStream(() => new MemoryStream(Image));
-			}
-			catch (Exception e)
-			{
-				DebugHelpers.PrintException(e);
-				return null;
-			}
-		}
-		#endregion
-	}
+                return ImageSource.FromStream(() => new MemoryStream(Image));
+            }
+            catch (Exception e)
+            {
+                DebugHelpers.PrintException(e);
+                return null;
+            }
+        }
+        #endregion
+    }
 }
