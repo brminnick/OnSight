@@ -12,7 +12,6 @@ namespace OnSight.iOS
 {
 	public class SQLite_iOS : ISQLite
 	{
-		
 		#region ISQLite implementation
 		public SQLiteAsyncConnection GetConnection()
 		{

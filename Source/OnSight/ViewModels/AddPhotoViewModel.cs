@@ -121,7 +121,7 @@ namespace OnSight
             return mediaFile;
         }
 
-        async Task SavePhotoToDatabase()
+        Task SavePhotoToDatabase()
         {
             var photoModel = new PhotoModel
             {
@@ -130,119 +130,121 @@ namespace OnSight
                 Image = ConvertStreamToByteArray(PhotoMediaFile.GetStream())
             };
 
-            await PhotoModelDatabase.SavePhoto(photoModel);
+            return PhotoModelDatabase.SavePhoto(photoModel);
         }
 
         byte[] ConvertStreamToByteArray(Stream stream)
-		{
-			using (MemoryStream memoryStream = new MemoryStream())
-			{
-				stream.CopyTo(memoryStream);
-				return memoryStream.ToArray();
-			}
-		}
+        {
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                stream.CopyTo(memoryStream);
+                return memoryStream.ToArray();
+            }
+        }
 
-		async Task<string> GenerateDefaultPhotoName()
-		{
-			int defaultPhotoNumber = 1;
-			string defaultPhotoText = "Photo";
+        async Task<string> GenerateDefaultPhotoName()
+        {
+            int defaultPhotoNumber = 1;
+            string defaultPhotoText = "Photo";
 
-			var photoModelList = await PhotoModelDatabase.GetAllPhotosForInspection(_inspectionId);
+            var photoModelList = await PhotoModelDatabase.GetAllPhotosForInspection(_inspectionId);
 
-			if (photoModelList != null)
-			{
-				foreach (PhotoModel photoModel in photoModelList)
-				{
-					if (photoModel.ImageName.Equals($"{defaultPhotoText} {defaultPhotoNumber}"))
-						defaultPhotoNumber++;
-				}
-			}
+            if (photoModelList != null)
+            {
+                foreach (PhotoModel photoModel in photoModelList)
+                {
+                    if (photoModel.ImageName.Equals($"{defaultPhotoText} {defaultPhotoNumber}"))
+                        defaultPhotoNumber++;
+                }
+            }
 
-			return $"{defaultPhotoText} {defaultPhotoNumber}";
-		}
+            return $"{defaultPhotoText} {defaultPhotoNumber}";
+        }
 
-		async Task UpdatePhotoImageSource()
-		{
-			if (PhotoMediaFile == null)
-				return;
+        Task UpdatePhotoImageSource()
+        {
+            if (PhotoMediaFile == null)
+                return Task.CompletedTask;
 
-			PhotoImageSource = ImageSource.FromStream(PhotoMediaFile.GetStream);
+            PhotoImageSource = ImageSource.FromStream(PhotoMediaFile.GetStream);
 
-			await ValidatePhoto();
-		}
+            return ValidatePhoto();
+        }
 
-		Stream GetPhotoStream(MediaFile mediaFile, bool disposeMediaFile)
-		{
-			var stream = mediaFile.GetStream();
+        Stream GetPhotoStream(MediaFile mediaFile, bool disposeMediaFile)
+        {
+            var stream = mediaFile.GetStream();
 
-			if (disposeMediaFile)
-				mediaFile.Dispose();
+            if (disposeMediaFile)
+                mediaFile.Dispose();
 
-			return stream;
-		}
+            return stream;
+        }
 
-		async Task ValidatePhoto()
-		{
-			IsValidatingPhoto = true;
+        async Task ValidatePhoto()
+        {
+            IsValidatingPhoto = true;
 
-			AnalysisResult imageAnalysisResult;
-			bool invalidAPIKey = false, internetConnectionFailed = false, isImageRacyOrContainAdultContent, doesImageContainAcceptablePhotoTags;
+            AnalysisResult imageAnalysisResult;
+            bool isImageRacyOrContainAdultContent, doesImageContainAcceptablePhotoTags, invalidAPIKey = false, internetConnectionFailed = false;
 
-			var visionClient = new VisionServiceClient(CognitiveServicesConstants.VisionAPIKey);
-			var visualFeatures = new VisualFeature[]
-			{
-				VisualFeature.Adult,
-				VisualFeature.Description
-			};
+            var visionClient = new VisionServiceClient(CognitiveServicesConstants.VisionAPIKey);
+            var visualFeatures = new VisualFeature[]
+            {
+                VisualFeature.Adult,
+                VisualFeature.Description
+            };
 
-			try
-			{
-				imageAnalysisResult = await visionClient.AnalyzeImageAsync(GetPhotoStream(PhotoMediaFile, false), visualFeatures);
-			}
-			catch (Exception e)
-			{
-				DebugHelpers.PrintException(e);
+            try
+            {
+                imageAnalysisResult = await visionClient.AnalyzeImageAsync(GetPhotoStream(PhotoMediaFile, false), visualFeatures);
+            }
+            catch (ClientException e) when (e.HttpStatus.Equals(System.Net.HttpStatusCode.Unauthorized))
+            {
+                DebugHelpers.PrintException(e);
 
-				imageAnalysisResult = null;
+                imageAnalysisResult = null;
+                invalidAPIKey = true;
+            }
+            catch (Exception e)
+            {
+                DebugHelpers.PrintException(e);
 
-				if ((e is ClientException) && ((ClientException)e).HttpStatus == System.Net.HttpStatusCode.Unauthorized)
-					invalidAPIKey = true;
-				else
-					internetConnectionFailed = true;
-			}
+                imageAnalysisResult = null;
+                internetConnectionFailed = true;
+            }
 
-			isImageRacyOrContainAdultContent = (imageAnalysisResult?.Adult?.IsAdultContent ?? false) || (imageAnalysisResult?.Adult.IsRacyContent ?? false);
-			doesImageContainAcceptablePhotoTags = imageAnalysisResult?.Description?.Tags?.Intersect(CognitiveServicesConstants.AcceptablePhotoTags)?.Any() ?? false;
+            isImageRacyOrContainAdultContent = (imageAnalysisResult?.Adult?.IsAdultContent ?? false) || (imageAnalysisResult?.Adult.IsRacyContent ?? false);
+            doesImageContainAcceptablePhotoTags = imageAnalysisResult?.Description?.Tags?.Intersect(CognitiveServicesConstants.AcceptablePhotoTags)?.Any() ?? false;
 
-			if (isImageRacyOrContainAdultContent 
-			    || !doesImageContainAcceptablePhotoTags 
-			    || invalidAPIKey 
-			    || internetConnectionFailed)
-			{
-				OnDisplayInvalidPhotoAlert(isImageRacyOrContainAdultContent, doesImageContainAcceptablePhotoTags, invalidAPIKey, internetConnectionFailed);
-				PhotoMediaFile.Dispose();
-				PhotoImageSource = null;
-			}
+            if (isImageRacyOrContainAdultContent
+                || !doesImageContainAcceptablePhotoTags
+                || invalidAPIKey
+                || internetConnectionFailed)
+            {
+                OnDisplayInvalidPhotoAlert(isImageRacyOrContainAdultContent, doesImageContainAcceptablePhotoTags, invalidAPIKey, internetConnectionFailed);
+                PhotoMediaFile.Dispose();
+                PhotoImageSource = null;
+            }
 
-			IsValidatingPhoto = false;
-		}
+            IsValidatingPhoto = false;
+        }
 
-		void OnDisplayInvalidPhotoAlert(
-			bool isImageInappropriate,
-			bool doesImageContainAcceptablePhotoTags,
-			bool invalidAPIKey,
-			bool internetConnectionFailed
-		) =>
-			DisplayInvalidPhotoAlert?.Invoke(this, new InvalidPhotoEventArgs(isImageInappropriate, doesImageContainAcceptablePhotoTags, invalidAPIKey, internetConnectionFailed));
+        void OnDisplayInvalidPhotoAlert(
+            bool isImageInappropriate,
+            bool doesImageContainAcceptablePhotoTags,
+            bool invalidAPIKey,
+            bool internetConnectionFailed) =>
+        DisplayInvalidPhotoAlert?.Invoke(this, new InvalidPhotoEventArgs(isImageInappropriate, doesImageContainAcceptablePhotoTags, invalidAPIKey, internetConnectionFailed));
 
-		void OnDisplayNoCameraAvailableAlert() =>
-			DisplayNoCameraAvailableAlert?.Invoke(this, EventArgs.Empty);
+        void OnDisplayNoCameraAvailableAlert() =>
+            DisplayNoCameraAvailableAlert?.Invoke(this, EventArgs.Empty);
 
-		void OnDuplicateImageNameDetected() =>
-			DuplicateImageNameDetected?.Invoke(this, EventArgs.Empty);
+        void OnDuplicateImageNameDetected() =>
+            DuplicateImageNameDetected?.Invoke(this, EventArgs.Empty);
 
-		void OnPhotoSavedToDatabaseCompleted() =>
-			PhotoSavedToDatabaseCompleted?.Invoke(this, EventArgs.Empty);
-		#endregion
-	}
+        void OnPhotoSavedToDatabaseCompleted() =>
+            PhotoSavedToDatabaseCompleted?.Invoke(this, EventArgs.Empty);
+        #endregion
+    }
 }

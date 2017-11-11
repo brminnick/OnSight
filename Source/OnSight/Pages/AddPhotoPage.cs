@@ -158,8 +158,7 @@ namespace OnSight
         void HandleDisplayNoCameraAvailableAlert(object sender, EventArgs e) =>
             Device.BeginInvokeOnMainThread(() => DisplayAlert("Error", "Camera Unavailable", "Ok"));
 
-        void HandlePhotoSavedToDatabaseCompleted(object sender, EventArgs e) =>
-            DismissPage();
+        void HandlePhotoSavedToDatabaseCompleted(object sender, EventArgs e) => DismissPage();
 
         void HandleCancelButtonClicked(object sender, EventArgs e) => DismissPage();
 
