@@ -23,7 +23,7 @@ namespace OnSight
         #endregion
 
         #region Methods
-        protected static async Task<SQLiteAsyncConnection> GetDatabaseConnectionAsync()
+        protected static async ValueTask<SQLiteAsyncConnection> GetDatabaseConnectionAsync()
         {
             if (!_isDatabaseInitialized)
                 await InitializeDatabase();

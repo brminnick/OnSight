@@ -2,11 +2,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnSight.iOS", "iOS\OnSight.iOS.csproj", "{D85E088C-EBBE-46B6-99D7-9842E52F7D04}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnSight.iOS", "OnSight.iOS\OnSight.iOS.csproj", "{D85E088C-EBBE-46B6-99D7-9842E52F7D04}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnSight.Droid", "Droid\OnSight.Droid.csproj", "{D81037D3-72D8-4DE6-8FDE-F02DE4B45E76}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnSight.Droid", "OnSight.Droid\OnSight.Droid.csproj", "{D81037D3-72D8-4DE6-8FDE-F02DE4B45E76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnSight.UWP", "UWP\OnSight.UWP.csproj", "{05A4B51F-0FCF-4F78-9D0F-7A00B6D155D2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnSight.UWP", "OnSight.UWP\OnSight.UWP.csproj", "{05A4B51F-0FCF-4F78-9D0F-7A00B6D155D2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnSight", "OnSight\OnSight.csproj", "{83E837A4-ED05-4326-BA8B-91188158041F}"
 EndProject
