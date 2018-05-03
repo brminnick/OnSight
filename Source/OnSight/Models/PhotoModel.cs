@@ -32,7 +32,7 @@ namespace OnSight
         {
             try
             {
-                if (Image == null)
+                if (Image is null)
                     return null;
 
                 return ImageSource.FromStream(() => new MemoryStream(Image));

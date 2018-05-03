@@ -4,16 +4,18 @@ namespace OnSight
 {
     public class InvalidPhotoEventArgs : EventArgs
     {
-        public InvalidPhotoEventArgs(bool isImageInappropriate, bool doesImageContainAcceptablePhotoTags,
+        public InvalidPhotoEventArgs(bool doesContainAdultContent, bool doesContainRacyContent, bool doesImageContainAcceptablePhotoTags,
             bool invalidAPIKey, bool internetConnectionFailed)
         {
-            IsImageInappropriate = isImageInappropriate;
+			DoesContainRacyContent = doesContainRacyContent;
+			DoesContainAdultCOntent = doesContainAdultContent;
             DoesImageContainAcceptablePhotoTags = doesImageContainAcceptablePhotoTags;
             InvalidAPIKey = invalidAPIKey;
             InternetConnectionFailed = internetConnectionFailed;
         }
 
-        public bool IsImageInappropriate { get; }
+		public bool DoesContainRacyContent { get; }
+        public bool DoesContainAdultCOntent { get; }
         public bool DoesImageContainAcceptablePhotoTags { get; }
         public bool InternetConnectionFailed { get; }
         public bool InvalidAPIKey { get; }

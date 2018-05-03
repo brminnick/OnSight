@@ -12,6 +12,7 @@ namespace OnSight
 		#endregion
 
 		#region Methods
+        [Conditional("DEBUG")]
 		public static void PrintException(
 			Exception exception,
 			[CallerMemberName] string callerMemberName = "",
