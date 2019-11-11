@@ -6,13 +6,10 @@ namespace OnSight
 {
     public class InspectionDetailsPage : ContentPage
     {
-        #region Constant Fields
         readonly string _inspectionId;
         readonly Button _viewPhotosButton;
         readonly InspectionDetailsViewModel _viewModel;
-        #endregion
 
-        #region Constructors
         public InspectionDetailsPage(string inspectionId)
         {
             _inspectionId = inspectionId;
@@ -37,6 +34,7 @@ namespace OnSight
             {
                 Text = "Photos"
             };
+            _viewPhotosButton.Clicked += HandleViewPhotosButtonClicked;
 
             this.SetBinding(TitleProperty, nameof(_viewModel.TitleText));
             NavigationPage.SetBackButtonTitle(this, "");
@@ -44,12 +42,6 @@ namespace OnSight
             Padding = new Thickness(20, 10);
 
             var relativeLayout = new RelativeLayout();
-
-            Func<RelativeLayout, double> getPhotosButtonHeight = (p) => _viewPhotosButton.Measure(p.Width, p.Height).Request.Height;
-            Func<RelativeLayout, double> getPhotosButtonWidth = (p) => _viewPhotosButton.Measure(p.Width, p.Height).Request.Width;
-
-            Func<RelativeLayout, double> getTitleEntryHeight = (p) => titleEntry.Measure(p.Width, p.Height).Request.Height;
-            Func<RelativeLayout, double> getTitleEntryWidth = (p) => titleEntry.Measure(p.Width, p.Height).Request.Width;
 
             relativeLayout.Children.Add(titleEntry,
                                        Constraint.Constant(0),
@@ -65,29 +57,20 @@ namespace OnSight
                                        Constraint.RelativeToView(notesEditor, (parent, view) => view.Height + view.Y + 10));
 
             Content = new ScrollView { Content = relativeLayout };
-        }
-        #endregion
 
-        #region Methods
-
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
-
-            _viewPhotosButton.Clicked += HandleViewPhotosButtonClicked;
+            double getPhotosButtonHeight(RelativeLayout p) => _viewPhotosButton.Measure(p.Width, p.Height).Request.Height;
+            double getPhotosButtonWidth(RelativeLayout p) => _viewPhotosButton.Measure(p.Width, p.Height).Request.Width;
+            double getTitleEntryHeight(RelativeLayout p) => titleEntry.Measure(p.Width, p.Height).Request.Height;
         }
 
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
 
-            _viewModel?.SaveDataCommand?.Execute(null);
-
-            _viewPhotosButton.Clicked -= HandleViewPhotosButtonClicked;
+            _viewModel.SaveDataCommand?.Execute(null);
         }
 
         void HandleViewPhotosButtonClicked(object sender, EventArgs e) =>
             Device.BeginInvokeOnMainThread(async () => await Navigation.PushAsync(new PhotosListPage(_inspectionId)));
-        #endregion
     }
 }

@@ -7,76 +7,76 @@ using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 using System.Linq;
 using System.Net.Http;
 using System.Net;
+using AsyncAwaitBestPractices;
 
 namespace OnSight
 {
-	static class ComputerVisionService
-	{
-		#region Constant Fields
-		static Lazy<ComputerVisionAPI> _computerVisionApiClientHolder =
-			new Lazy<ComputerVisionAPI>(() => new ComputerVisionAPI(new ApiKeyServiceClientCredentials(CognitiveServicesConstants.VisionAPIKey)) { AzureRegion = Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models.AzureRegions.Westus });
-		#endregion
+    static class ComputerVisionService
+    {
+        static readonly WeakEventManager<InvalidPhotoEventArgs> _invalidPhotoSubmittedEventManager = new WeakEventManager<InvalidPhotoEventArgs>();
 
-		#region Events
-		public static event EventHandler<InvalidPhotoEventArgs> DisplayInvalidPhotoAlert;
-		#endregion
+        static readonly Lazy<ComputerVisionClient> _computerVisionApiClientHolder =
+            new Lazy<ComputerVisionClient>(() => new ComputerVisionClient(new ApiKeyServiceClientCredentials(CognitiveServicesConstants.VisionApiKey)) { Endpoint = CognitiveServicesConstants.VisionApiBaseUrl });
 
-		#region Properties
-		static ComputerVisionAPI ComputerVisionApiClient => _computerVisionApiClientHolder.Value;
-		#endregion
+        public static event EventHandler<InvalidPhotoEventArgs> InvalidPhotoSubmitted
+        {
+            add => _invalidPhotoSubmittedEventManager.AddEventHandler(value);
+            remove => _invalidPhotoSubmittedEventManager.RemoveEventHandler(value);
+        }
 
-		#region Methods
-		public static async Task<bool> IsPhotoValid(Stream photo, List<string> acceptablePhotoTags, bool shouldAllowAdultContent = false, bool shouldAllowRacyContent = false)
-		{
-			bool doesImageContainAcceptablePhotoTags;
-			bool isInvalidAPIKey = false, hasInternetConnectionFailed = false;
+        static ComputerVisionClient ComputerVisionApiClient => _computerVisionApiClientHolder.Value;
 
-			ImageAnalysis imageAnalysisResult;
-			try
-			{
-				imageAnalysisResult = await ComputerVisionApiClient.AnalyzeImageInStreamAsync(photo, new List<VisualFeatureTypes> { VisualFeatureTypes.Adult, VisualFeatureTypes.Description }).ConfigureAwait(false);
-			}
-			catch (HttpRequestException e) when (((e?.InnerException as WebException)?.Status.Equals(WebExceptionStatus.NameResolutionFailure) ?? false)
-												 || ((e?.InnerException as WebException)?.Status.Equals(WebExceptionStatus.ConnectFailure) ?? false))
-			{
-				DebugHelpers.PrintException(e);
+        public static async Task<bool> IsPhotoValid(Stream photo, List<string> acceptablePhotoTags, bool shouldAllowAdultContent = false, bool shouldAllowRacyContent = false)
+        {
+            bool doesImageContainAcceptablePhotoTags;
+            bool isInvalidAPIKey = false, hasInternetConnectionFailed = false;
 
-				imageAnalysisResult = null;
-				hasInternetConnectionFailed = true;
-			}
-			catch (ComputerVisionErrorException e) when (e.Response.StatusCode.Equals(HttpStatusCode.Unauthorized))
-			{
-				DebugHelpers.PrintException(e);
+            ImageAnalysis? imageAnalysisResult;
+            try
+            {
+                imageAnalysisResult = await ComputerVisionApiClient.AnalyzeImageInStreamAsync(photo, new List<VisualFeatureTypes> { VisualFeatureTypes.Adult, VisualFeatureTypes.Description }).ConfigureAwait(false);
+            }
+            catch (HttpRequestException e) when (e.InnerException is WebException webException
+                                                    && (webException.Status.Equals(WebExceptionStatus.NameResolutionFailure)
+                                                        || (webException.Status.Equals(WebExceptionStatus.ConnectFailure))))
+            {
+                DebugService.PrintException(e);
 
-				imageAnalysisResult = null;
-				isInvalidAPIKey = true;
-			}
+                imageAnalysisResult = null;
+                hasInternetConnectionFailed = true;
+            }
+            catch (ComputerVisionErrorException e) when (e.Response.StatusCode.Equals(HttpStatusCode.Unauthorized))
+            {
+                DebugService.PrintException(e);
 
-			var doesContainAdultContent = imageAnalysisResult?.Adult?.IsAdultContent ?? false;
-			var doesContainRacyContent = imageAnalysisResult?.Adult?.IsRacyContent ?? false;
+                imageAnalysisResult = null;
+                isInvalidAPIKey = true;
+            }
 
-			doesImageContainAcceptablePhotoTags = imageAnalysisResult?.Description?.Tags?.Intersect(acceptablePhotoTags)?.Any() ?? false;
+            var doesContainAdultContent = imageAnalysisResult?.Adult?.IsAdultContent ?? false;
+            var doesContainRacyContent = imageAnalysisResult?.Adult?.IsRacyContent ?? false;
 
-			if ((doesContainAdultContent && !shouldAllowAdultContent)
-				|| (doesContainRacyContent && !shouldAllowRacyContent)
-				|| !doesImageContainAcceptablePhotoTags
-				|| isInvalidAPIKey
-				|| hasInternetConnectionFailed)
-			{
-				OnDisplayInvalidPhotoAlert(doesContainAdultContent, doesContainRacyContent, doesImageContainAcceptablePhotoTags, isInvalidAPIKey, hasInternetConnectionFailed);
-				return false;
-			}
+            doesImageContainAcceptablePhotoTags = imageAnalysisResult?.Description?.Tags?.Intersect(acceptablePhotoTags)?.Any() ?? false;
 
-			return true;
-		}
+            if ((doesContainAdultContent && !shouldAllowAdultContent)
+                || (doesContainRacyContent && !shouldAllowRacyContent)
+                || !doesImageContainAcceptablePhotoTags
+                || isInvalidAPIKey
+                || hasInternetConnectionFailed)
+            {
+                OnDisplayInvalidPhotoAlert(doesContainAdultContent, doesContainRacyContent, doesImageContainAcceptablePhotoTags, isInvalidAPIKey, hasInternetConnectionFailed);
+                return false;
+            }
 
-		static void OnDisplayInvalidPhotoAlert(
-			bool doesContainAdultContent,
-			bool doesContainRacyContent,
-			bool doesImageContainAcceptablePhotoTags,
-			bool invalidAPIKey,
-			bool internetConnectionFailed) =>
-		DisplayInvalidPhotoAlert?.Invoke(null, new InvalidPhotoEventArgs(doesContainAdultContent, doesContainRacyContent, doesImageContainAcceptablePhotoTags, invalidAPIKey, internetConnectionFailed));
-		#endregion
-	}
+            return true;
+        }
+
+        static void OnDisplayInvalidPhotoAlert(
+            bool doesContainAdultContent,
+            bool doesContainRacyContent,
+            bool doesImageContainAcceptablePhotoTags,
+            bool invalidAPIKey,
+            bool internetConnectionFailed) =>
+        _invalidPhotoSubmittedEventManager.HandleEvent(null, new InvalidPhotoEventArgs(doesContainAdultContent, doesContainRacyContent, doesImageContainAcceptablePhotoTags, invalidAPIKey, internetConnectionFailed), nameof(InvalidPhotoSubmitted));
+    }
 }

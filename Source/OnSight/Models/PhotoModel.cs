@@ -9,26 +9,21 @@ namespace OnSight
 {
     public class PhotoModel
     {
-        #region Constructors
         public PhotoModel() => Id = Guid.NewGuid().ToString();
-        #endregion
 
-        #region Properties
         [Ignore]
-        public ImageSource ImageSource => GetImageSource();
+        public ImageSource? ImageSource => GetImageSource();
 
         [Unique, PrimaryKey]
         public string Id { get; set; }
 
-        public string InspectionModelId { get; set; }
+        public string InspectionModelId { get; set; } = string.Empty;
 
-        public string ImageName { get; set; }
+        public string ImageName { get; set; } = string.Empty;
 
-        public byte[] Image { get; set; }
-        #endregion
+        public byte[]? Image { get; set; }
 
-        #region Methods
-        ImageSource GetImageSource()
+        ImageSource? GetImageSource()
         {
             try
             {
@@ -39,10 +34,9 @@ namespace OnSight
             }
             catch (Exception e)
             {
-                DebugHelpers.PrintException(e);
+                DebugService.PrintException(e);
                 return null;
             }
         }
-        #endregion
     }
 }

@@ -2,17 +2,15 @@
 
 namespace OnSight
 {
-	public class App : Application
-	{
-		#region Constructors
-		public App()
-		{
-			MainPage = new NavigationPage(new InspectionListPage())
-			{
-				BarBackgroundColor = ColorConstants.NavigationBarBackgroundColor,
-				BarTextColor = ColorConstants.NavigationBarTextColor
-			};
-		}
-		#endregion
-	}
+    public class App : Application
+    {
+        public App()
+        {
+            MainPage = new NavigationPage(new InspectionListPage())
+            {
+                BarBackgroundColor = ColorConstants.NavigationBarBackgroundColor,
+                BarTextColor = ColorConstants.NavigationBarTextColor
+            };
+        }
+    }
 }

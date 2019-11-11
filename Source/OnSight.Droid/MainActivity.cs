@@ -4,25 +4,26 @@ using Android.Content.PM;
 
 namespace OnSight.Droid
 {
-    [Activity(Label = "OnSight.Droid", Icon = "@drawable/icon", Theme = "@style/MyTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
-    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
-    {
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
-        {
-            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-            Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
+	[Activity(Label = "OnSight.Droid", Icon = "@drawable/icon", Theme = "@style/MyTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+	public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
+	{
+		public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+		{
+			base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+			Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+			Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+		}
 
-        protected override void OnCreate(Bundle bundle)
-        {
-            TabLayoutResource = Resource.Layout.Tabbar;
-            ToolbarResource = Resource.Layout.Toolbar;
+		protected override void OnCreate(Bundle savedInstanceState)
+		{
+			TabLayoutResource = Resource.Layout.Tabbar;
+			ToolbarResource = Resource.Layout.Toolbar;
 
-            base.OnCreate(bundle);
+			base.OnCreate(bundle);
+			Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+			global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
-            global::Xamarin.Forms.Forms.Init(this, bundle);
-
-            LoadApplication(new App());
-        }
-    }
+			LoadApplication(new App());
+		}
+	}
 }

@@ -1,113 +1,92 @@
 ﻿using System;
-
+using System.Collections;
+using System.Linq;
 using Xamarin.Forms;
 
 namespace OnSight
 {
-	public class InspectionListPage : ContentPage
-	{
-		#region Constant Fields
-		readonly ListView _listView;
-		readonly InspectionListViewModel _viewModel;
-		#endregion
+    public class InspectionListPage : ContentPage
+    {
+        public InspectionListPage()
+        {
+            BindingContext = new InspectionListViewModel();
 
-		#region Constructors
-		public InspectionListPage()
-		{
-			_viewModel = new InspectionListViewModel();
-			BindingContext = _viewModel;
+            var relativeLayout = new RelativeLayout();
 
-			var relativeLayout = new RelativeLayout();
-
-			_listView = new ListView(ListViewCachingStrategy.RecycleElement)
-			{
-				ItemTemplate = new DataTemplate(typeof(InspectionListViewCell)),
-				IsPullToRefreshEnabled = true,
-				SeparatorVisibility = SeparatorVisibility.None,
+            var listView = new ListView(ListViewCachingStrategy.RecycleElement)
+            {
+                ItemTemplate = new DataTemplate(typeof(InspectionListViewCell)),
+                IsPullToRefreshEnabled = true,
+                SeparatorVisibility = SeparatorVisibility.None,
                 RowHeight = 50
-			};
-			_listView.SetBinding(ListView.RefreshCommandProperty, nameof(_viewModel.PullToRefreshCommand));
-			_listView.SetBinding(ListView.ItemsSourceProperty, nameof(_viewModel.VisibleInspectionModelList));
+            };
+            listView.SetBinding(ListView.IsRefreshingProperty, nameof(InspectionListViewModel.IsListViewRefreshing));
+            listView.SetBinding(ListView.RefreshCommandProperty, nameof(InspectionListViewModel.PullToRefreshCommand));
+            listView.SetBinding(ListView.ItemsSourceProperty, nameof(InspectionListViewModel.VisibleInspectionModelList));
+            listView.ItemTapped += HandleItemTapped;
 
-			relativeLayout.Children.Add(_listView,
-									   Constraint.Constant(0),
-									   Constraint.Constant(0),
-									   Constraint.RelativeToParent(parent => parent.Width),
-									   Constraint.RelativeToParent(parent => parent.Height));
+            relativeLayout.Children.Add(listView,
+                                       Constraint.Constant(0),
+                                       Constraint.Constant(0),
+                                       Constraint.RelativeToParent(parent => parent.Width),
+                                       Constraint.RelativeToParent(parent => parent.Height));
 
-			var addInspectionToolbarItem = new ToolbarItem();
-			switch (Device.RuntimePlatform)
-			{
-				case Device.iOS:
-				case Device.Android:
-					addInspectionToolbarItem.Icon = "Add";
-					break;
-				case Device.UWP:
-					addInspectionToolbarItem.Icon = "Assets/Add.png";
-					break;
-				default:
-					throw new Exception("Runtime Platform Not Supported");
-			}
-			addInspectionToolbarItem.Clicked += (sender, e) =>
-			{
-				var addInspectionView = new AddInspectionView();
+            var addInspectionToolbarItem = new ToolbarItem
+            {
+                IconImageSource = Device.RuntimePlatform switch
+                {
+                    Device.iOS => "Add",
+                    Device.Android => "Add",
+                    Device.UWP => "Assets/Add.png",
+                    _ => throw new NotSupportedException()
+                }
+            };
+            addInspectionToolbarItem.Clicked += HandleAddInspectionToolbarItemClicked;
+            ToolbarItems.Add(addInspectionToolbarItem);
 
-				relativeLayout.Children.Add(addInspectionView,
-										   Constraint.Constant(0),
-										   Constraint.Constant(0));
+            Title = "OnSight";
 
-				addInspectionView.DisplayView();
-			};
-			ToolbarItems.Add(addInspectionToolbarItem);
+            NavigationPage.SetBackButtonTitle(this, "Home");
 
-			Title = "OnSight";
+            Content = relativeLayout;
+        }
 
-			NavigationPage.SetBackButtonTitle(this, "Home");
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
 
-			Content = relativeLayout;
+            if (Content is RelativeLayout relativeLayout
+                && relativeLayout.Children.OfType<ListView>().First() is ListView listView
+                && IsNullOrEmpty(listView.ItemsSource))
+            {
+                listView.BeginRefresh();
+            }
 
-		}
-		#endregion
+            static bool IsNullOrEmpty(in IEnumerable? enumerable) => !enumerable?.GetEnumerator().MoveNext() ?? true;
+        }
 
-		#region Methods
-		protected override void OnAppearing()
-		{
-			base.OnAppearing();
+        void HandleAddInspectionToolbarItemClicked(object sender, EventArgs e)
+        {
+            var addInspectionView = new AddInspectionView();
 
-			_viewModel.PullToRefreshCompleted += HandlePullToRefreshCompleted;
-			_listView.ItemTapped += HandleItemTapped;
+            var relativeLayout = (RelativeLayout)Content;
 
-			UpdateListData();
-		}
+            relativeLayout.Children.Add(addInspectionView,
+                                       Constraint.Constant(0),
+                                       Constraint.Constant(0));
 
-		protected override void OnDisappearing()
-		{
-			base.OnDisappearing();
+            addInspectionView.DisplayView();
+        }
 
-			_viewModel.PullToRefreshCompleted -= HandlePullToRefreshCompleted;
-			_listView.ItemTapped -= HandleItemTapped;
-		}
+        void HandleItemTapped(object sender, ItemTappedEventArgs e)
+        {
+            var listView = (ListView)sender;
+            listView.SelectedItem = null;
 
-		void UpdateListData()
-		{
-			Device.BeginInvokeOnMainThread(_listView.BeginRefresh);
-		}
-
-		void HandleItemTapped(object sender, ItemTappedEventArgs e)
-		{
-			var selectedInspectionModel = e.Item as InspectionModel;
-
-			Device.BeginInvokeOnMainThread(async () =>
-			{
-				await Navigation.PushAsync(new InspectionDetailsPage(selectedInspectionModel.Id));
-				_listView.SelectedItem = null;
-			});
-		}
-
-		void HandlePullToRefreshCompleted(object sender, EventArgs e)
-		{
-			Device.BeginInvokeOnMainThread(_listView.EndRefresh);
-		}
-		#endregion
-	}
+            if (e?.Item is InspectionModel selectedInspectionModel)
+            {
+                Device.BeginInvokeOnMainThread(async () => await Navigation.PushAsync(new InspectionDetailsPage(selectedInspectionModel.Id)));
+            }
+        }
+    }
 }

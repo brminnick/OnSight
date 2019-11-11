@@ -1,29 +1,27 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Collections.Generic;
-
-using Xamarin.Forms;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using AsyncAwaitBestPractices.MVVM;
 
 namespace OnSight
 {
     public class InspectionListViewModel : BaseViewModel
     {
-        #region Fields
-        string _titleEntryText;
-        Command _pullToRefreshCommand, _submitButtonCommand;
-        List<InspectionModel> _visibleInspectionModelList;
-        #endregion
+        bool _isListViewRefreshing;
+        string _titleEntryText = string.Empty;
+        ICommand? _pullToRefreshCommand, _submitButtonCommand;
+        List<InspectionModel> _visibleInspectionModelList = Enumerable.Empty<InspectionModel>().ToList();
 
-        #region Events
-        public event EventHandler PullToRefreshCompleted;
-        #endregion
+        public ICommand PullToRefreshCommand => _pullToRefreshCommand ??= new AsyncCommand(ExecutePullToRefreshCommand);
+        public ICommand SubmitButtonCommand => _submitButtonCommand ??= new AsyncCommand(ExecuteSubmitButtonCommand);
 
-        #region Properties
-        public Command PullToRefreshCommand => _pullToRefreshCommand ??
-            (_pullToRefreshCommand = new Command(async () => await ExecutePullToRefreshCommand()));
-
-        public Command SubmitButtonCommand => _submitButtonCommand ??
-            (_submitButtonCommand = new Command(async () => await ExecuteSubmitButtonCommand()));
+        public bool IsListViewRefreshing
+        {
+            get => _isListViewRefreshing;
+            set => SetProperty(ref _isListViewRefreshing, value);
+        }
 
         public List<InspectionModel> VisibleInspectionModelList
         {
@@ -36,13 +34,17 @@ namespace OnSight
             get => _titleEntryText;
             set => SetProperty(ref _titleEntryText, value);
         }
-        #endregion
 
-        #region Methods
         async Task ExecutePullToRefreshCommand()
         {
-            await Task.WhenAll(RefreshData(), DisplayRefreshingIndicator(500));
-            OnPullToRefreshCompleted();
+            try
+            {
+                await Task.WhenAll(RefreshData(), DisplayRefreshingIndicator(500)).ConfigureAwait(false);
+            }
+            finally
+            {
+                IsListViewRefreshing = false;
+            }
         }
 
         async Task ExecuteSubmitButtonCommand()
@@ -53,18 +55,14 @@ namespace OnSight
                 InspectionDateUTC = DateTime.UtcNow
             };
 
-            await InspectionModelDatabase.SaveInspectionModelAsync(inspectionModel);
-            await RefreshData();
+            await InspectionModelDatabase.SaveInspectionModelAsync(inspectionModel).ConfigureAwait(false);
+            await RefreshData().ConfigureAwait(false);
         }
 
         async Task RefreshData() =>
-            VisibleInspectionModelList = await InspectionModelDatabase.GetAllInspectionModelsAsync();
+            VisibleInspectionModelList = await InspectionModelDatabase.GetAllInspectionModelsAsync().ConfigureAwait(false);
 
-        async Task DisplayRefreshingIndicator(int indicatorDisplayTimeInMilliseconds) =>
-            await Task.Delay(TimeSpan.FromMilliseconds(indicatorDisplayTimeInMilliseconds));
-
-        void OnPullToRefreshCompleted() =>
-            PullToRefreshCompleted?.Invoke(this, EventArgs.Empty);
-        #endregion
+        Task DisplayRefreshingIndicator(int indicatorDisplayTimeInMilliseconds) =>
+            Task.Delay(TimeSpan.FromMilliseconds(indicatorDisplayTimeInMilliseconds));
     }
 }

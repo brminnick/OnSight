@@ -1,71 +1,62 @@
-﻿using System.Windows.Input;
+﻿using System;
 using System.Threading.Tasks;
-
-using Xamarin.Forms;
+using System.Windows.Input;
+using AsyncAwaitBestPractices;
+using AsyncAwaitBestPractices.MVVM;
 
 namespace OnSight
 {
-	public class InspectionDetailsViewModel : BaseViewModel
-	{
-		#region Constant Fields
-		readonly string _inspectionId;
-		#endregion
+    public class InspectionDetailsViewModel : BaseViewModel
+    {
+        readonly string _inspectionId;
 
-		#region Fields
-		string _titleText, _notesText = "Notes";
-		ICommand _saveDataCommand;
-		InspectionModel _inspectionModel;
-		#endregion
+        string _titleText = string.Empty, _notesText = "Notes";
+        ICommand? _saveDataCommand;
+        InspectionModel? _inspectionModel;
 
-		#region Constructors
-		public InspectionDetailsViewModel(string inspectionId)
-		{
-			_inspectionId = inspectionId;
-			Task.Run(async () => await UpdateInspectionModel());
-		}
-		#endregion
+        public InspectionDetailsViewModel(string inspectionId)
+        {
+            _inspectionId = inspectionId;
+            UpdateInspectionModel().SafeFireAndForget();
+        }
 
-		#region Properties 
-		public ICommand SaveDataCommand => _saveDataCommand ??
-			(_saveDataCommand = new Command(async () => await ExecuteSaveDataCommand()));
+        public ICommand? SaveDataCommand => _saveDataCommand ??= new AsyncCommand(ExecuteSaveDataCommand);
 
-		public string TitleText
-		{
-			get => _titleText;
-			set => SetProperty(ref _titleText, value);
-		}
+        public string TitleText
+        {
+            get => _titleText;
+            set => SetProperty(ref _titleText, value);
+        }
 
-		public string NotesText
-		{
-			get => _notesText;
-			set => SetProperty(ref _notesText, value);
-		}
+        public string NotesText
+        {
+            get => _notesText;
+            set => SetProperty(ref _notesText, value);
+        }
 
-		InspectionModel InspectionModel
-		{
-			get => _inspectionModel;
-			set => SetProperty(ref _inspectionModel, value, async () => await UpdateInspectionModel());
-		}
-		#endregion
+        InspectionModel InspectionModel
+        {
+            get => _inspectionModel ?? throw new NullReferenceException();
+            set => SetProperty(ref _inspectionModel, value, async () => await UpdateInspectionModel().ConfigureAwait(false));
+        }
 
-		#region Methods
-		async Task ExecuteSaveDataCommand()
-		{
-			InspectionModel.InspectionNotes = NotesText;
-			InspectionModel.InspectionTitle = TitleText;
+        Task ExecuteSaveDataCommand()
+        {
+            InspectionModel.InspectionNotes = NotesText;
+            InspectionModel.InspectionTitle = TitleText;
 
-			await InspectionModelDatabase.SaveInspectionModelAsync(InspectionModel);
-		}
+            return InspectionModelDatabase.SaveInspectionModelAsync(InspectionModel);
+        }
 
-		async Task UpdateInspectionModel()
-		{
-            if (InspectionModel?.Id.Equals(_inspectionId) ?? false)
-				return;
-
-			InspectionModel = await InspectionModelDatabase.GetInspectionModelAsync(_inspectionId);
-			NotesText = InspectionModel.InspectionNotes;
-			TitleText = InspectionModel.InspectionTitle;
-		}
-		#endregion
-	}
+        async ValueTask UpdateInspectionModel()
+        {
+            if (_inspectionModel is null
+                || _inspectionModel.Id != _inspectionId)
+            {
+                InspectionModel = await InspectionModelDatabase.GetInspectionModelAsync(_inspectionId).ConfigureAwait(false);
+                NotesText = InspectionModel.InspectionNotes;
+                TitleText = InspectionModel.InspectionTitle;
+            }
+        }
+    }
 }

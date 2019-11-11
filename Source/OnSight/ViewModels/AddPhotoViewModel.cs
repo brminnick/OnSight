@@ -1,175 +1,178 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-
+using System.Windows.Input;
+using AsyncAwaitBestPractices;
+using AsyncAwaitBestPractices.MVVM;
 using Plugin.Media.Abstractions;
-
 using Xamarin.Forms;
 
 namespace OnSight
 {
-	public class AddPhotoViewModel : BaseViewModel
-	{
-		#region Constant Fields
-		readonly string _inspectionId;
-		#endregion
+    public class AddPhotoViewModel : BaseViewModel
+    {
+        readonly string _inspectionId;
 
-		#region Fields
-		string _photoNameText;
-		bool _isAnalyzingPhoto;
-		Command _takePhotoButtonCommand, _saveButtonCommand, _generateDefaultPhotoNameCommand;
-		ImageSource _photoImageSource;
-		MediaFile _photoMediaFile;
-		#endregion
+        readonly WeakEventManager _duplicateImageNameDetectedEventManager = new WeakEventManager();
+        readonly WeakEventManager _displayNoCameraAvailableAlertEventManager = new WeakEventManager();
+        readonly WeakEventManager _photoSavedToDatabaseCompletedEventManager = new WeakEventManager();
 
-		#region Constructors
-		public AddPhotoViewModel(string inspectionId)
-		{
-			_inspectionId = inspectionId;
+        bool _isAnalyzingPhoto;
+        string _photoNameText = string.Empty;
+        ICommand? _takePhotoButtonCommand, _saveButtonCommand;
+        ImageSource? _photoImageSource;
+        MediaFile? _photoMediaFile;
 
-			GenerateDefaultPhotoNameCommand?.Execute(null);
-		}
-		#endregion
+        public AddPhotoViewModel(string inspectionId)
+        {
+            _inspectionId = inspectionId;
 
-		#region Properties
-		public Command SaveButtonCommand => _saveButtonCommand ??
-			(_saveButtonCommand = new Command(async () => await ExecuteSaveButtonCommand(_inspectionId, PhotoImageNameText, PhotoMediaFile).ConfigureAwait(false)));
+            GenerateDefaultPhotoName().SafeFireAndForget();
+        }
 
-		public Command TakePhotoButtonCommand => _takePhotoButtonCommand ??
-			(_takePhotoButtonCommand = new Command(async () => await ExecuteTakePhotoButtonCommand().ConfigureAwait(false)));
+        public event EventHandler DuplicateImageNameDetected
+        {
+            add => _duplicateImageNameDetectedEventManager.AddEventHandler(value);
+            remove => _duplicateImageNameDetectedEventManager.RemoveEventHandler(value);
+        }
 
-		public ImageSource PhotoImageSource
-		{
-			get => _photoImageSource;
-			set => SetProperty(ref _photoImageSource, value);
-		}
+        public event EventHandler DisplayNoCameraAvailableAlert
+        {
+            add => _displayNoCameraAvailableAlertEventManager.AddEventHandler(value);
+            remove => _displayNoCameraAvailableAlertEventManager.RemoveEventHandler(value);
+        }
 
-		public string PhotoImageNameText
-		{
-			get => _photoNameText;
-			set => SetProperty(ref _photoNameText, value);
-		}
+        public event EventHandler PhotoSavedToDatabaseCompleted
+        {
+            add => _photoSavedToDatabaseCompletedEventManager.AddEventHandler(value);
+            remove => _photoSavedToDatabaseCompletedEventManager.RemoveEventHandler(value);
+        }
 
-		public bool IsValidatingPhoto
-		{
-			get => _isAnalyzingPhoto;
-			set => SetProperty(ref _isAnalyzingPhoto, value);
-		}
+        public ICommand SaveButtonCommand => _saveButtonCommand ??= new AsyncCommand(() => ExecuteSaveButtonCommand(_inspectionId, PhotoImageNameText, PhotoMediaFile));
+        public ICommand TakePhotoButtonCommand => _takePhotoButtonCommand ??= new AsyncCommand(ExecuteTakePhotoButtonCommand);
 
-		Command GenerateDefaultPhotoNameCommand => _generateDefaultPhotoNameCommand ??
-			(_generateDefaultPhotoNameCommand = new Command(async () => PhotoImageNameText = await GenerateDefaultPhotoName(_inspectionId).ConfigureAwait(false)));
+        public ImageSource? PhotoImageSource
+        {
+            get => _photoImageSource;
+            set => SetProperty(ref _photoImageSource, value);
+        }
 
-		MediaFile PhotoMediaFile
-		{
-			get => _photoMediaFile;
-			set => SetProperty(ref _photoMediaFile, value, async () => await UpdatePhotoImageSource(PhotoMediaFile).ConfigureAwait(false));
-		}
-		#endregion
+        public string PhotoImageNameText
+        {
+            get => _photoNameText;
+            set => SetProperty(ref _photoNameText, value);
+        }
 
-		#region Events
-		public event EventHandler DuplicateImageNameDetected;
-		public event EventHandler DisplayNoCameraAvailableAlert;
-		public event EventHandler PhotoSavedToDatabaseCompleted;
-		#endregion
+        public bool IsValidatingPhoto
+        {
+            get => _isAnalyzingPhoto;
+            set => SetProperty(ref _isAnalyzingPhoto, value);
+        }
 
-		#region Methods
-		async Task ExecuteTakePhotoButtonCommand() =>
-			PhotoMediaFile = await MediaService.GetMediaFileFromCamera("OnSite", "Onsite").ConfigureAwait(false);
+        MediaFile? PhotoMediaFile
+        {
+            get => _photoMediaFile;
+            set => SetProperty(ref _photoMediaFile, value, async () => await UpdatePhotoImageSource(PhotoMediaFile).ConfigureAwait(false));
+        }
 
-		async Task ExecuteSaveButtonCommand(string inspectionId, string photoImageNameText, MediaFile photoMediaFile)
-		{
-			if (IsValidatingPhoto)
-				return;
+        async Task GenerateDefaultPhotoName() =>
+            PhotoImageNameText = await GenerateDefaultPhotoName(_inspectionId).ConfigureAwait(false);
 
-			var photoModelList = await PhotoModelDatabase.GetAllPhotosForInspection(inspectionId).ConfigureAwait(false);
+        async Task ExecuteTakePhotoButtonCommand() =>
+            PhotoMediaFile = await MediaService.GetMediaFileFromCamera("OnSite").ConfigureAwait(false);
 
-			var doesPhotoImageNameTextExist = !(photoModelList?.FirstOrDefault(x => x.ImageName.Equals(photoImageNameText)) is null);
+        async Task ExecuteSaveButtonCommand(string inspectionId, string photoImageNameText, MediaFile ?photoMediaFile)
+        {
+            if (IsValidatingPhoto)
+                return;
 
-			if (doesPhotoImageNameTextExist)
-			{
-				OnDuplicateImageNameDetected();
-			}
-			else
-			{
-				await SavePhotoToDatabase(inspectionId, photoImageNameText, photoMediaFile).ConfigureAwait(false);
-				OnPhotoSavedToDatabaseCompleted();
-			}
-		}
+            var photoModelList = await PhotoModelDatabase.GetAllPhotosForInspection(inspectionId).ConfigureAwait(false);
 
-		Task SavePhotoToDatabase(string inspectionId, string photoImageNameText, MediaFile photoMediaFile)
-		{
-			var photoModel = new PhotoModel
-			{
-				InspectionModelId = inspectionId,
-				ImageName = photoImageNameText,
-				Image = ConvertStreamToByteArray(photoMediaFile.GetStream())
-			};
+            var doesPhotoImageNameTextExist = photoModelList.Any(x => x.ImageName.Equals(photoImageNameText));
+            if (doesPhotoImageNameTextExist)
+            {
+                OnDuplicateImageNameDetected();
+            }
+            else
+            {
+                await SavePhotoToDatabase(inspectionId, photoImageNameText, photoMediaFile).ConfigureAwait(false);
+                OnPhotoSavedToDatabaseCompleted();
+            }
+        }
 
-			return PhotoModelDatabase.SavePhoto(photoModel);
-		}
+        Task SavePhotoToDatabase(string inspectionId, string photoImageNameText, MediaFile? photoMediaFile)
+        {
+            var photoModel = new PhotoModel
+            {
+                InspectionModelId = inspectionId,
+                ImageName = photoImageNameText,
+                Image = photoMediaFile is null ? null : ConvertStreamToByteArray(photoMediaFile.GetStream())
+            };
 
-		byte[] ConvertStreamToByteArray(Stream stream)
-		{
-			using (MemoryStream memoryStream = new MemoryStream())
-			{
-				stream.CopyTo(memoryStream);
-				return memoryStream.ToArray();
-			}
-		}
+            return PhotoModelDatabase.SavePhoto(photoModel);
+        }
 
-		async Task<string> GenerateDefaultPhotoName(string inspectionId)
-		{
-			int defaultPhotoNumber = 1;
-			const string defaultPhotoText = "Photo";
+        byte[] ConvertStreamToByteArray(Stream stream)
+        {
+            using MemoryStream memoryStream = new MemoryStream();
 
-			var photoModelList = await PhotoModelDatabase.GetAllPhotosForInspection(inspectionId).ConfigureAwait(false);
+            stream.CopyTo(memoryStream);
 
-			if (!(photoModelList is null))
-			{
-				foreach (var photoModel in photoModelList)
-				{
-					if (photoModel.ImageName?.Equals($"{defaultPhotoText} {defaultPhotoNumber}") ?? false)
-						defaultPhotoNumber++;
-				}
-			}
+            return memoryStream.ToArray();
+        }
 
-			return $"{defaultPhotoText} {defaultPhotoNumber}";
-		}
+        async Task<string> GenerateDefaultPhotoName(string inspectionId)
+        {
+            int defaultPhotoNumber = 1;
+            const string defaultPhotoText = "Photo";
 
-		async Task UpdatePhotoImageSource(MediaFile photoMediaFile)
-		{
-			if (photoMediaFile is null)
-				return;
+            var photoModelList = await PhotoModelDatabase.GetAllPhotosForInspection(inspectionId).ConfigureAwait(false);
 
-			PhotoImageSource = ImageSource.FromStream(photoMediaFile.GetStream);
+            if (!(photoModelList is null))
+            {
+                foreach (var photoModel in photoModelList)
+                {
+                    if (photoModel.ImageName?.Equals($"{defaultPhotoText} {defaultPhotoNumber}") ?? false)
+                        defaultPhotoNumber++;
+                }
+            }
 
-			IsValidatingPhoto = true;
+            return $"{defaultPhotoText} {defaultPhotoNumber}";
+        }
 
-			try
-			{
-				var isPhotoValid = await ComputerVisionService.IsPhotoValid(photoMediaFile.GetStream(), new List<string> { "plant", "flower" }).ConfigureAwait(false);
-				if (!isPhotoValid)
-				{
-					photoMediaFile.Dispose();
-					PhotoImageSource = null;
-				}
-			}
-			finally
-			{
-				IsValidatingPhoto = false;
-			}
-		}
+        async Task UpdatePhotoImageSource(MediaFile? photoMediaFile)
+        {
+            if (photoMediaFile is null)
+                return;
 
-		void OnDisplayNoCameraAvailableAlert() =>
-			DisplayNoCameraAvailableAlert?.Invoke(this, EventArgs.Empty);
+            PhotoImageSource = ImageSource.FromStream(photoMediaFile.GetStream);
 
-		void OnDuplicateImageNameDetected() =>
-			DuplicateImageNameDetected?.Invoke(this, EventArgs.Empty);
+            IsValidatingPhoto = true;
 
-		void OnPhotoSavedToDatabaseCompleted() =>
-			PhotoSavedToDatabaseCompleted?.Invoke(this, EventArgs.Empty);
-		#endregion
-	}
+            try
+            {
+                var isPhotoValid = await ComputerVisionService.IsPhotoValid(photoMediaFile.GetStream(), new List<string> { "plant", "flower" }).ConfigureAwait(false);
+                if (!isPhotoValid)
+                {
+                    photoMediaFile.Dispose();
+                    PhotoImageSource = null;
+                }
+            }
+            finally
+            {
+                IsValidatingPhoto = false;
+            }
+        }
+
+        void OnDisplayNoCameraAvailableAlert() =>
+            _displayNoCameraAvailableAlertEventManager.HandleEvent(this, EventArgs.Empty, nameof(DisplayNoCameraAvailableAlert));
+
+        void OnDuplicateImageNameDetected() =>
+            _duplicateImageNameDetectedEventManager.HandleEvent(this, EventArgs.Empty, nameof(DuplicateImageNameDetected));
+
+        void OnPhotoSavedToDatabaseCompleted() =>
+            _photoSavedToDatabaseCompletedEventManager.HandleEvent(this, EventArgs.Empty, nameof(PhotoSavedToDatabaseCompleted));
+    }
 }

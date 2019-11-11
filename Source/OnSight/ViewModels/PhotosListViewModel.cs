@@ -1,60 +1,54 @@
 ﻿using System;
-using System.Windows.Input;
-using System.Threading.Tasks;
 using System.Collections.Generic;
-
-using Xamarin.Forms;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using AsyncAwaitBestPractices;
+using AsyncAwaitBestPractices.MVVM;
 
 namespace OnSight
 {
     public class PhotosListViewModel : BaseViewModel
     {
-        #region Constant Fields
         readonly string _inspectionId;
-        #endregion
 
-        #region Fields
-		ICommand _refreshCommand;
-        List<PhotoModel> _visibleNoteModelList;
-        #endregion
+        bool _isListRefreshing;
+        ICommand? _refreshCommand;
+        List<PhotoModel> _visibleNoteModelList = Enumerable.Empty<PhotoModel>().ToList();
 
-        #region Constructors
         public PhotosListViewModel(string inspectionId) => _inspectionId = inspectionId;
 
-        #endregion
+        public ICommand RefreshCommand => _refreshCommand ??= new AsyncCommand(ExecuteRefreshCommand);
 
-        #region Properties
-        public ICommand RefreshCommand => _refreshCommand ??
-            (_refreshCommand = new Command(async () => await ExecuteRefreshCommand()));
+        public bool IsListRefreshing
+        {
+            get => _isListRefreshing;
+            set => SetProperty(ref _isListRefreshing, value);
+        }
 
         public List<PhotoModel> VisiblePhotoModelList
         {
             get => _visibleNoteModelList;
             set => SetProperty(ref _visibleNoteModelList, value);
         }
-        #endregion
 
-        #region Events
-        public event EventHandler PullToRefreshCompleted;
-        #endregion
-
-        #region Methods
         async Task ExecuteRefreshCommand()
         {
-            await DisplayRefreshingIndicator(500);
-            await RefreshData();
-            OnPullToRefreshCompleted();
+            try
+            {
+                await Task.WhenAll(RefreshData(), DisplayRefreshingIndicator(500)).ConfigureAwait(false);
+            }
+            finally
+            {
+                IsListRefreshing = false;
+            }
         }
 
-		async Task RefreshData() =>
-		    VisiblePhotoModelList = await PhotoModelDatabase.GetAllPhotosForInspection(_inspectionId);
+        async Task RefreshData() =>
+            VisiblePhotoModelList = await PhotoModelDatabase.GetAllPhotosForInspection(_inspectionId);
 
-        async Task DisplayRefreshingIndicator(int indicatorDisplayTimeInSeconds) =>
-            await Task.Delay(TimeSpan.FromMilliseconds(indicatorDisplayTimeInSeconds));
-
-        void OnPullToRefreshCompleted() =>
-            PullToRefreshCompleted?.Invoke(this, EventArgs.Empty);
-        #endregion
+        Task DisplayRefreshingIndicator(int indicatorDisplayTimeInSeconds) =>
+            Task.Delay(TimeSpan.FromMilliseconds(indicatorDisplayTimeInSeconds));
     }
 
 }

@@ -5,28 +5,26 @@ namespace OnSight
 {
     public abstract class InspectionModelDatabase : BaseDatabase
     {
-        #region Methods
         public static async Task<List<InspectionModel>> GetAllInspectionModelsAsync()
         {
-            var databaseConnection = await GetDatabaseConnectionAsync();
+            var databaseConnection = await GetDatabaseConnection<InspectionModel>().ConfigureAwait(false);
 
-            return await databaseConnection?.Table<InspectionModel>()?.ToListAsync();
+            return await databaseConnection.Table<InspectionModel>().ToListAsync().ConfigureAwait(false);
         }
 
         public static async Task<InspectionModel> GetInspectionModelAsync(string id)
         {
-            var databaseConnection = await GetDatabaseConnectionAsync();
+            var databaseConnection = await GetDatabaseConnection<InspectionModel>().ConfigureAwait(false);
 
-            return await databaseConnection?.Table<InspectionModel>()?.Where(x => x.Id.Equals(id))?.FirstOrDefaultAsync() ?? null;
+            return await databaseConnection.Table<InspectionModel>().FirstAsync(x => x.Id.Equals(id));
         }
 
         public static async Task<int> SaveInspectionModelAsync(InspectionModel inspectionModel)
         {
-            var databaseConnection = await GetDatabaseConnectionAsync();
+            var databaseConnection = await GetDatabaseConnection<InspectionModel>().ConfigureAwait(false);
 
-            return await databaseConnection?.InsertOrReplaceAsync(inspectionModel);
+            return await databaseConnection.InsertOrReplaceAsync(inspectionModel).ConfigureAwait(false);
         }
-        #endregion
     }
 }
 

@@ -1,41 +1,27 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 using SQLite;
-
-using Xamarin.Forms;
 
 namespace OnSight
 {
     public abstract class BaseDatabase
     {
-        #region Constant Fields
+        static readonly string _databasePath = Path.Combine(Xamarin.Essentials.FileSystem.AppDataDirectory, $"{nameof(OnSight)}.db3");
+
         static readonly Lazy<SQLiteAsyncConnection> _databaseConnectionHolder =
-            new Lazy<SQLiteAsyncConnection>(() => DependencyService.Get<ISQLite>().GetConnection());
-        #endregion
+            new Lazy<SQLiteAsyncConnection>(() => new SQLiteAsyncConnection(_databasePath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.SharedCache));
 
-        #region Fields
-        static bool _isDatabaseInitialized;
-        #endregion
-
-        #region Properties
         static SQLiteAsyncConnection DatabaseConnection => _databaseConnectionHolder.Value;
-        #endregion
 
-        #region Methods
-        protected static async ValueTask<SQLiteAsyncConnection> GetDatabaseConnectionAsync()
+        protected static async Task<SQLiteAsyncConnection> GetDatabaseConnection<T>()
         {
-            if (!_isDatabaseInitialized)
-                await InitializeDatabase();
+            if (!DatabaseConnection.TableMappings.Any(x => x.MappedType.Name == typeof(T).Name))
+                await DatabaseConnection.CreateTablesAsync(CreateFlags.None, typeof(T)).ConfigureAwait(false);
 
             return DatabaseConnection;
         }
-
-        static async Task InitializeDatabase()
-        {
-            await DatabaseConnection.CreateTablesAsync<InspectionModel, PhotoModel>();
-            _isDatabaseInitialized = true;
-        }
-        #endregion
     }
 }
