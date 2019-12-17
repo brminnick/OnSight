@@ -132,7 +132,7 @@ namespace OnSight
                 errorString.AppendLine("Internet Connection Failed");
             if (!e.DoesImageContainAcceptablePhotoTags)
                 errorString.AppendLine("No Plant Detected");
-            if (e.DoesContainAdultCOntent)
+            if (e.DoesContainAdultContent)
                 errorString.AppendLine("Adult Content Detected");
             if (e.DoesContainRacyContent)
                 errorString.AppendLine("Racy Content Detected");

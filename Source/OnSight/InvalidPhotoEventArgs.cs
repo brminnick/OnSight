@@ -8,14 +8,14 @@ namespace OnSight
             bool invalidAPIKey, bool internetConnectionFailed)
         {
 			DoesContainRacyContent = doesContainRacyContent;
-			DoesContainAdultCOntent = doesContainAdultContent;
+			DoesContainAdultContent = doesContainAdultContent;
             DoesImageContainAcceptablePhotoTags = doesImageContainAcceptablePhotoTags;
             InvalidAPIKey = invalidAPIKey;
             InternetConnectionFailed = internetConnectionFailed;
         }
 
 		public bool DoesContainRacyContent { get; }
-        public bool DoesContainAdultCOntent { get; }
+        public bool DoesContainAdultContent { get; }
         public bool DoesImageContainAcceptablePhotoTags { get; }
         public bool InternetConnectionFailed { get; }
         public bool InvalidAPIKey { get; }
