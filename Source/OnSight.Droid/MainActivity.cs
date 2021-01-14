@@ -11,7 +11,6 @@ namespace OnSight.Droid
 		{
 			base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 			Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-			Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 		}
 
 		protected override void OnCreate(Bundle savedInstanceState)
@@ -19,7 +18,8 @@ namespace OnSight.Droid
 			TabLayoutResource = Resource.Layout.Tabbar;
 			ToolbarResource = Resource.Layout.Toolbar;
 
-			base.OnCreate(bundle);
+			base.OnCreate(savedInstanceState);
+
 			Xamarin.Essentials.Platform.Init(this, savedInstanceState);
 			global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
 

@@ -1,20 +1,26 @@
 ﻿using System;
-
+using System.ComponentModel;
 using SQLite;
 
 namespace OnSight
 {
-    public class InspectionModel
+    public record InspectionModel
     {
         public InspectionModel() => Id = Guid.NewGuid().ToString();
 
         [Unique, PrimaryKey]
-        public string Id { get; set; }
+        public string Id { get; init; }
 
-        public string InspectionTitle { get; set; } = string.Empty;
+        public string InspectionTitle { get; init; } = string.Empty;
 
-        public DateTimeOffset InspectionDateUTC { get; set; }
+        public DateTimeOffset InspectionDateUTC { get; init; }
 
-        public string InspectionNotes { get; set; } = string.Empty;
+        public string InspectionNotes { get; init; } = string.Empty;
     }
+}
+
+namespace System.Runtime.CompilerServices
+{
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public class IsExternalInit { }
 }

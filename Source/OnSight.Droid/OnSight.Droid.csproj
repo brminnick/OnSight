@@ -8,7 +8,7 @@
         <OutputType>Library</OutputType>
         <RootNamespace>OnSight.Droid</RootNamespace>
         <AssemblyName>OnSight.Droid</AssemblyName>
-        <TargetFrameworkVersion>v10.0</TargetFrameworkVersion>
+        <TargetFrameworkVersion>v11.0</TargetFrameworkVersion>
         <AndroidApplication>True</AndroidApplication>
         <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
         <AndroidResgenClass>Resource</AndroidResgenClass>
@@ -16,10 +16,9 @@
         <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
         <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
         <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-        <NuGetPackageImportStamp>
-        </NuGetPackageImportStamp>
-        <AndroidTlsProvider>
-        </AndroidTlsProvider>
+        <Nullable>enable</Nullable>
+        <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <DebugSymbols>true</DebugSymbols>
@@ -57,22 +56,20 @@
         <Reference Include="Microsoft.CSharp" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="sqlite-net-pcl" Version="1.6.292" />
-        <PackageReference Include="Xam.Plugin.Media" Version="4.0.1.5" />
+        <PackageReference Include="sqlite-net-pcl" Version="1.7.335" />
+        <PackageReference Include="Xam.Plugin.Media" Version="5.0.1" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-        <PackageReference Include="Xamarin.Forms" Version="4.4.0.991265" />
-        <PackageReference Include="Microsoft.Azure.CognitiveServices.Vision.ComputerVision" Version="5.0.0" />
-        <PackageReference Include="Xamarin.Essentials" Version="1.3.1" />
-        <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="4.0.1" />
+        <PackageReference Include="Xamarin.Forms" Version="5.0.0.1874" />
+        <PackageReference Include="Microsoft.Azure.CognitiveServices.Vision.ComputerVision" Version="6.0.0" />
+        <PackageReference Include="Xamarin.Essentials" Version="1.6.0" />
+        <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="5.0.2" />
     </ItemGroup>
     <ItemGroup>
         <Compile Include="MainActivity.cs" />
         <Compile Include="Resources\Resource.designer.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
-        <Compile Include="MainApplication.cs" />
     </ItemGroup>
     <ItemGroup>
-        <None Include="app.config" />
         <None Include="Resources\AboutResources.txt" />
         <None Include="Properties\AndroidManifest.xml" />
         <None Include="Assets\AboutAssets.txt" />

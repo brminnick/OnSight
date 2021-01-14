@@ -20,7 +20,7 @@ namespace OnSight
             UpdateInspectionModel().SafeFireAndForget();
         }
 
-        public ICommand? SaveDataCommand => _saveDataCommand ??= new AsyncCommand(ExecuteSaveDataCommand);
+        public ICommand SaveDataCommand => _saveDataCommand ??= new AsyncCommand(ExecuteSaveDataCommand);
 
         public string TitleText
         {
@@ -42,16 +42,14 @@ namespace OnSight
 
         Task ExecuteSaveDataCommand()
         {
-            InspectionModel.InspectionNotes = NotesText;
-            InspectionModel.InspectionTitle = TitleText;
+            InspectionModel = InspectionModel with { InspectionNotes = NotesText, InspectionTitle = TitleText };
 
             return InspectionModelDatabase.SaveInspectionModelAsync(InspectionModel);
         }
 
         async ValueTask UpdateInspectionModel()
         {
-            if (_inspectionModel is null
-                || _inspectionModel.Id != _inspectionId)
+            if (_inspectionModel is null || _inspectionModel.Id != _inspectionId)
             {
                 InspectionModel = await InspectionModelDatabase.GetInspectionModelAsync(_inspectionId).ConfigureAwait(false);
                 NotesText = InspectionModel.InspectionNotes;

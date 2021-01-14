@@ -34,7 +34,7 @@ namespace OnSight
             ImageAnalysis? imageAnalysisResult;
             try
             {
-                imageAnalysisResult = await ComputerVisionApiClient.AnalyzeImageInStreamAsync(photo, new List<VisualFeatureTypes> { VisualFeatureTypes.Adult, VisualFeatureTypes.Description }).ConfigureAwait(false);
+                imageAnalysisResult = await ComputerVisionApiClient.AnalyzeImageInStreamAsync(photo, new List<VisualFeatureTypes?> { VisualFeatureTypes.Adult, VisualFeatureTypes.Description }).ConfigureAwait(false);
             }
             catch (HttpRequestException e) when (e.InnerException is WebException webException
                                                     && (webException.Status.Equals(WebExceptionStatus.NameResolutionFailure)
@@ -71,12 +71,7 @@ namespace OnSight
             return true;
         }
 
-        static void OnDisplayInvalidPhotoAlert(
-            bool doesContainAdultContent,
-            bool doesContainRacyContent,
-            bool doesImageContainAcceptablePhotoTags,
-            bool invalidAPIKey,
-            bool internetConnectionFailed) =>
-        _invalidPhotoSubmittedEventManager.HandleEvent(null, new InvalidPhotoEventArgs(doesContainAdultContent, doesContainRacyContent, doesImageContainAcceptablePhotoTags, invalidAPIKey, internetConnectionFailed), nameof(InvalidPhotoSubmitted));
+        static void OnDisplayInvalidPhotoAlert(bool doesContainAdultContent, bool doesContainRacyContent, bool doesImageContainAcceptablePhotoTags, bool invalidAPIKey, bool internetConnectionFailed) =>
+        _invalidPhotoSubmittedEventManager.RaiseEvent(null, new InvalidPhotoEventArgs(doesContainAdultContent, doesContainRacyContent, doesImageContainAcceptablePhotoTags, invalidAPIKey, internetConnectionFailed), nameof(InvalidPhotoSubmitted));
     }
 }

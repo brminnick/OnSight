@@ -10,8 +10,9 @@
         <AssemblyName>OnSight.iOS</AssemblyName>
         <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
         <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-        <NuGetPackageImportStamp>
-        </NuGetPackageImportStamp>
+        <Nullable>enable</Nullable>
+        <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
         <DebugSymbols>true</DebugSymbols>
@@ -91,13 +92,13 @@
         <Reference Include="Microsoft.CSharp" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="sqlite-net-pcl" Version="1.6.292" />
-        <PackageReference Include="Xam.Plugin.Media" Version="4.0.1.5" />
+        <PackageReference Include="sqlite-net-pcl" Version="1.7.335" />
+        <PackageReference Include="Xam.Plugin.Media" Version="5.0.1" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-        <PackageReference Include="Xamarin.Forms" Version="4.4.0.991265" />
-        <PackageReference Include="Microsoft.Azure.CognitiveServices.Vision.ComputerVision" Version="5.0.0" />
-        <PackageReference Include="Xamarin.Essentials" Version="1.3.1" />
-        <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="4.0.1" />
+        <PackageReference Include="Xamarin.Forms" Version="5.0.0.1874" />
+        <PackageReference Include="Microsoft.Azure.CognitiveServices.Vision.ComputerVision" Version="6.0.0" />
+        <PackageReference Include="Xamarin.Essentials" Version="1.6.0" />
+        <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="5.0.2" />
     </ItemGroup>
     <ItemGroup>
         <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json">

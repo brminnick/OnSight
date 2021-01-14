@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace OnSight
 {
-    public class AddInspectionView : BaseContentView<InspectionListViewModel>
+    class AddInspectionView : ContentView
     {
         readonly Entry _titleEntry;
         readonly BoxView _backgroundOverlayBoxView;
@@ -15,8 +14,8 @@ namespace OnSight
 
         readonly RelativeLayout _relativeLayout;
 
-        readonly Color _whiteWith75Opacity = new Color(255, 255, 255, 0.75);
-        readonly Color _blackWith75PercentOpacity = new Color(0, 0, 0, 0.75);
+        readonly Color _whiteWith75Opacity = new(255, 255, 255, 0.75);
+        readonly Color _blackWith75PercentOpacity = new(0, 0, 0, 0.75);
 
         public AddInspectionView()
         {
@@ -40,7 +39,7 @@ namespace OnSight
             {
                 Placeholder = "Title"
             };
-            _titleEntry.SetBinding(Entry.TextProperty, nameof(ViewModel.TitleEntryText));
+            _titleEntry.SetBinding(Entry.TextProperty, nameof(InspectionListViewModel.TitleEntryText));
 
             var submitButton = new Button
             {
@@ -52,7 +51,7 @@ namespace OnSight
                 Margin = new Thickness(5),
                 Text = submitButtonText
             };
-            submitButton.SetBinding(Button.CommandProperty, nameof(ViewModel.SubmitButtonCommand));
+            submitButton.SetBinding(Button.CommandProperty, nameof(InspectionListViewModel.SubmitButtonCommand));
             submitButton.Clicked += HandleSubmitButtonClicked;
 
             _textEntryButtonStack = new StackLayout
@@ -95,30 +94,24 @@ namespace OnSight
             double getOverlayFrameWidth(RelativeLayout p) => _overlayFrame.Measure(p.Width, p.Height).Request.Width;
         }
 
-        public Task DisplayView()
+        public Task DisplayView() => MainThread.InvokeOnMainThreadAsync(async () =>
         {
-            return Device.InvokeOnMainThreadAsync(async () =>
-            {
-                await Task.WhenAll(_backgroundOverlayBoxView.FadeTo(1, AnimationConstants.AddInspectionViewAnimationTime),
-                                    _textEntryButtonStack.ScaleTo(AnimationConstants.AddInspectionViewMaxSize, AnimationConstants.AddInspectionViewAnimationTime),
-                                    _overlayFrame.ScaleTo(AnimationConstants.AddInspectionViewMaxSize, AnimationConstants.AddInspectionViewAnimationTime));
+            await Task.WhenAll(_backgroundOverlayBoxView.FadeTo(1, AnimationConstants.AddInspectionViewAnimationTime),
+                                _textEntryButtonStack.ScaleTo(AnimationConstants.AddInspectionViewMaxSize, AnimationConstants.AddInspectionViewAnimationTime),
+                                _overlayFrame.ScaleTo(AnimationConstants.AddInspectionViewMaxSize, AnimationConstants.AddInspectionViewAnimationTime));
 
-                await Task.WhenAll(_textEntryButtonStack.ScaleTo(AnimationConstants.AddInspectionViewNormalSize, AnimationConstants.AddInspectionViewAnimationTime),
-                                    _overlayFrame.ScaleTo(AnimationConstants.AddInspectionViewNormalSize, AnimationConstants.AddInspectionViewAnimationTime));
+            await Task.WhenAll(_textEntryButtonStack.ScaleTo(AnimationConstants.AddInspectionViewNormalSize, AnimationConstants.AddInspectionViewAnimationTime),
+                                _overlayFrame.ScaleTo(AnimationConstants.AddInspectionViewNormalSize, AnimationConstants.AddInspectionViewAnimationTime));
 
-                _titleEntry.Focus();
-            });
-        }
+            _titleEntry.Focus();
+        });
 
-        public Task DismissView()
+        public Task DismissView() => MainThread.InvokeOnMainThreadAsync(async () =>
         {
-            return Device.InvokeOnMainThreadAsync(async () =>
-            {
-                await this.FadeTo(0);
-                IsVisible = false;
-                InputTransparent = true;
-            });
-        }
+            await this.FadeTo(0);
+            IsVisible = false;
+            InputTransparent = true;
+        });
 
         async void HandleSubmitButtonClicked(object sender, EventArgs e) => await DismissView();
     }

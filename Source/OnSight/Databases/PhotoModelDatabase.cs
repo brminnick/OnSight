@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace OnSight
 {
-    public abstract class PhotoModelDatabase : BaseDatabase
+    abstract class PhotoModelDatabase : BaseDatabase
     {
 		public static async Task<int> SavePhoto(PhotoModel photoModel)
 		{
@@ -19,7 +19,7 @@ namespace OnSight
             return await databaseConnection.Table<PhotoModel>().FirstAsync(x => x.Id.Equals(id)).ConfigureAwait(false);
 		}
 
-		public static async Task<List<PhotoModel>> GetAllPhotosForInspection(string inspectionModelId)
+		public static async Task<IReadOnlyList<PhotoModel>> GetAllPhotosForInspection(string inspectionModelId)
 		{
 			var databaseConnection = await GetDatabaseConnection<PhotoModel>().ConfigureAwait(false);
 

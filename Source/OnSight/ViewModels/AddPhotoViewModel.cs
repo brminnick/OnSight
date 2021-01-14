@@ -15,9 +15,9 @@ namespace OnSight
     {
         readonly string _inspectionId;
 
-        readonly WeakEventManager _duplicateImageNameDetectedEventManager = new WeakEventManager();
-        readonly WeakEventManager _displayNoCameraAvailableAlertEventManager = new WeakEventManager();
-        readonly WeakEventManager _photoSavedToDatabaseCompletedEventManager = new WeakEventManager();
+        readonly AsyncAwaitBestPractices.WeakEventManager _duplicateImageNameDetectedEventManager = new();
+        readonly AsyncAwaitBestPractices.WeakEventManager _displayNoCameraAvailableAlertEventManager = new();
+        readonly AsyncAwaitBestPractices.WeakEventManager _photoSavedToDatabaseCompletedEventManager = new();
 
         bool _isAnalyzingPhoto;
         string _photoNameText = string.Empty;
@@ -167,12 +167,12 @@ namespace OnSight
         }
 
         void OnDisplayNoCameraAvailableAlert() =>
-            _displayNoCameraAvailableAlertEventManager.HandleEvent(this, EventArgs.Empty, nameof(DisplayNoCameraAvailableAlert));
+            _displayNoCameraAvailableAlertEventManager.RaiseEvent(this, EventArgs.Empty, nameof(DisplayNoCameraAvailableAlert));
 
         void OnDuplicateImageNameDetected() =>
-            _duplicateImageNameDetectedEventManager.HandleEvent(this, EventArgs.Empty, nameof(DuplicateImageNameDetected));
+            _duplicateImageNameDetectedEventManager.RaiseEvent(this, EventArgs.Empty, nameof(DuplicateImageNameDetected));
 
         void OnPhotoSavedToDatabaseCompleted() =>
-            _photoSavedToDatabaseCompletedEventManager.HandleEvent(this, EventArgs.Empty, nameof(PhotoSavedToDatabaseCompleted));
+            _photoSavedToDatabaseCompletedEventManager.RaiseEvent(this, EventArgs.Empty, nameof(PhotoSavedToDatabaseCompleted));
     }
 }

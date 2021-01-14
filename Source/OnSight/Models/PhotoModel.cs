@@ -7,7 +7,7 @@ using Xamarin.Forms;
 
 namespace OnSight
 {
-    public class PhotoModel
+    public record PhotoModel
     {
         public PhotoModel() => Id = Guid.NewGuid().ToString();
 
@@ -15,13 +15,13 @@ namespace OnSight
         public ImageSource? ImageSource => GetImageSource();
 
         [Unique, PrimaryKey]
-        public string Id { get; set; }
+        public string Id { get; init; }
 
-        public string InspectionModelId { get; set; } = string.Empty;
+        public string InspectionModelId { get; init; } = string.Empty;
 
-        public string ImageName { get; set; } = string.Empty;
+        public string ImageName { get; init; } = string.Empty;
 
-        public byte[]? Image { get; set; }
+        public byte[]? Image { get; init; }
 
         ImageSource? GetImageSource()
         {

@@ -1,76 +1,59 @@
 ﻿using System;
-
+using Xamarin.Essentials;
 using Xamarin.Forms;
+using Xamarin.CommunityToolkit.Markup;
+using static Xamarin.CommunityToolkit.Markup.GridRowsColumns;
+using static OnSight.MarkupExtensions;
 
 namespace OnSight
 {
-    public class InspectionDetailsPage : ContentPage
+    class InspectionDetailsPage : BaseContentPage<InspectionDetailsViewModel>
     {
         readonly string _inspectionId;
-        readonly Button _viewPhotosButton;
-        readonly InspectionDetailsViewModel _viewModel;
 
-        public InspectionDetailsPage(string inspectionId)
+        public InspectionDetailsPage(string inspectionId) : base(new InspectionDetailsViewModel(inspectionId))
         {
             _inspectionId = inspectionId;
 
-            _viewModel = new InspectionDetailsViewModel(inspectionId);
-            BindingContext = _viewModel;
-
-            var titleEntry = new Entry
-            {
-                Placeholder = "Title",
-                HorizontalTextAlignment = TextAlignment.Center
-            };
-            titleEntry.SetBinding(Entry.TextProperty, nameof(_viewModel.TitleText));
-
-            var notesEditor = new Editor
-            {
-                BackgroundColor = ColorConstants.EditorBackgroundColor
-            };
-            notesEditor.SetBinding(Editor.TextProperty, nameof(_viewModel.NotesText));
-
-            _viewPhotosButton = new Button
-            {
-                Text = "Photos"
-            };
-            _viewPhotosButton.Clicked += HandleViewPhotosButtonClicked;
-
-            this.SetBinding(TitleProperty, nameof(_viewModel.TitleText));
             NavigationPage.SetBackButtonTitle(this, "");
+
+            this.SetBinding(TitleProperty, nameof(InspectionDetailsViewModel.TitleText));
 
             Padding = new Thickness(20, 10);
 
-            var relativeLayout = new RelativeLayout();
+            Content = new Grid
+            {
+                RowDefinitions = Rows.Define(
+                    (Row.Title, AbsoluteGridLength(30)),
+                    (Row.Notes, AbsoluteGridLength(300)),
+                    (Row.Button, Star)),
 
-            relativeLayout.Children.Add(titleEntry,
-                                       Constraint.Constant(0),
-                                       Constraint.Constant(0),
-                                       Constraint.RelativeToParent(parent => parent.Width));
-            relativeLayout.Children.Add(notesEditor,
-                                       Constraint.Constant(0),
-                                       Constraint.RelativeToView(titleEntry, (parent, view) => view.Height + view.Y + 10),
-                                       Constraint.RelativeToParent(parent => parent.Width),
-                                       Constraint.RelativeToParent(parent => parent.Height / 2 - getTitleEntryHeight(parent) - getPhotosButtonHeight(parent) - 30));
-            relativeLayout.Children.Add(_viewPhotosButton,
-                                       Constraint.RelativeToParent(parent => parent.Width / 2 - getPhotosButtonWidth(parent) / 2),
-                                       Constraint.RelativeToView(notesEditor, (parent, view) => view.Height + view.Y + 10));
+                Children =
+                {
+                    new Entry { Placeholder = "Title", HorizontalTextAlignment = TextAlignment.Center }
+                        .Row(Row.Title)
+                        .Bind(Entry.TextProperty, nameof(InspectionDetailsViewModel.TitleText)),
 
-            Content = new ScrollView { Content = relativeLayout };
+                    new Editor { BackgroundColor = ColorConstants.EditorBackgroundColor, HeightRequest = 200 }
+                        .Row(Row.Notes)
+                        .Bind(Editor.TextProperty, nameof(InspectionDetailsViewModel.NotesText)),
 
-            double getPhotosButtonHeight(RelativeLayout p) => _viewPhotosButton.Measure(p.Width, p.Height).Request.Height;
-            double getPhotosButtonWidth(RelativeLayout p) => _viewPhotosButton.Measure(p.Width, p.Height).Request.Width;
-            double getTitleEntryHeight(RelativeLayout p) => titleEntry.Measure(p.Width, p.Height).Request.Height;
+                    new Button { Text = "Photos" }.Top()
+                        .Row(Row.Button)
+                        .Invoke(button=>button.Clicked += HandleViewPhotosButtonClicked)
+                }
+            };
         }
+
+        enum Row { Title, Notes, Button }
 
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-
-            _viewModel.SaveDataCommand?.Execute(null);
+            ViewModel.SaveDataCommand.Execute(null);
         }
 
         void HandleViewPhotosButtonClicked(object sender, EventArgs e) =>
-            Device.BeginInvokeOnMainThread(async () => await Navigation.PushAsync(new PhotosListPage(_inspectionId)));
+            MainThread.BeginInvokeOnMainThread(() => Navigation.PushAsync(new PhotosListPage(_inspectionId)));
     }
 }

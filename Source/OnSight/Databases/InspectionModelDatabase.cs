@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace OnSight
 {
-    public abstract class InspectionModelDatabase : BaseDatabase
+    abstract class InspectionModelDatabase : BaseDatabase
     {
-        public static async Task<List<InspectionModel>> GetAllInspectionModelsAsync()
+        public static async Task<IReadOnlyList<InspectionModel>> GetAllInspectionModelsAsync()
         {
             var databaseConnection = await GetDatabaseConnection<InspectionModel>().ConfigureAwait(false);
 

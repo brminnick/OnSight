@@ -1,47 +1,29 @@
 ﻿using System;
 using System.Text;
 using System.Threading.Tasks;
+using Xamarin.CommunityToolkit.Markup;
+using Xamarin.Essentials;
 using Xamarin.Forms;
+using static Xamarin.CommunityToolkit.Markup.GridRowsColumns;
 
 namespace OnSight
 {
-    public class AddPhotoPage : ContentPage
+    class AddPhotoPage : BaseContentPage<AddPhotoViewModel>
     {
-        readonly AddPhotoViewModel _viewModel;
-        readonly ToolbarItem _saveButton, _cancelButton;
         readonly Entry _photoImageNameEntry;
 
-        public AddPhotoPage(string inspectionId)
+        public AddPhotoPage(string inspectionId) : base(new AddPhotoViewModel(inspectionId))
         {
-            _viewModel = new AddPhotoViewModel(inspectionId);
-            BindingContext = _viewModel;
+            ViewModel.DuplicateImageNameDetected += HandleDuplicateImageNameDetected;
+            ViewModel.PhotoSavedToDatabaseCompleted += HandlePhotoSavedToDatabaseCompleted;
+            ViewModel.DisplayNoCameraAvailableAlert += HandleDisplayNoCameraAvailableAlert;
+            ComputerVisionService.InvalidPhotoSubmitted += HandleInvalidPhotoSubmitted;
 
-            var validatingPhotoLabel = new Label
-            {
-                Text = "Validating Photo",
-                HorizontalTextAlignment = TextAlignment.Center
-            };
-            validatingPhotoLabel.SetBinding(IsVisibleProperty, nameof(AddPhotoViewModel.IsValidatingPhoto));
+            Padding = new Thickness(40, 10);
 
-            var validatingPhotoActivityIndicator = new ActivityIndicator();
-            validatingPhotoActivityIndicator.SetBinding(IsVisibleProperty, nameof(AddPhotoViewModel.IsValidatingPhoto));
-            validatingPhotoActivityIndicator.SetBinding(ActivityIndicator.IsRunningProperty, nameof(AddPhotoViewModel.IsValidatingPhoto));
+            this.Bind(TitleProperty, nameof(AddPhotoViewModel.PhotoImageNameText));
 
-            var validatingPhotoFrame = new Frame
-            {
-                HorizontalOptions = LayoutOptions.Center,
-                VerticalOptions = LayoutOptions.Center,
-                Content = new StackLayout
-                {
-                    Children = {
-                        validatingPhotoLabel,
-                        validatingPhotoActivityIndicator
-                    }
-                }
-            };
-            validatingPhotoFrame.SetBinding(IsVisibleProperty, nameof(AddPhotoViewModel.IsValidatingPhoto));
-
-            _saveButton = new ToolbarItem
+            ToolbarItems.Add(new ToolbarItem
             {
                 IconImageSource = Device.RuntimePlatform switch
                 {
@@ -50,11 +32,9 @@ namespace OnSight
                     Device.UWP => "Assets/Save.png",
                     _ => throw new NotSupportedException()
                 }
-            };
-            _saveButton.SetBinding(ToolbarItem.CommandProperty, nameof(AddPhotoViewModel.SaveButtonCommand));
-            ToolbarItems.Add(_saveButton);
+            }.Bind(ToolbarItem.CommandProperty, nameof(AddPhotoViewModel.SaveButtonCommand)));
 
-            _cancelButton = new ToolbarItem
+            ToolbarItems.Add(new ToolbarItem
             {
                 IconImageSource = Device.RuntimePlatform switch
                 {
@@ -63,66 +43,49 @@ namespace OnSight
                     Device.UWP => "Assets/Cancel.png",
                     _ => throw new NotSupportedException()
                 }
-            };
-            ToolbarItems.Add(_cancelButton);
+            }.Invoke(cancelButton => cancelButton.Clicked += HandleCancelButtonClicked));
 
-            var photoImage = new Image();
-            photoImage.SetBinding(Image.SourceProperty, nameof(AddPhotoViewModel.PhotoImageSource));
-
-            _photoImageNameEntry = new Entry();
-            _photoImageNameEntry.SetBinding(Entry.TextProperty, nameof(AddPhotoViewModel.PhotoImageNameText));
-
-            var takePhotoButton = new Button
+            Content = new Grid
             {
-                Text = "New Plant Photo"
-            };
-            takePhotoButton.SetBinding(Button.CommandProperty, nameof(AddPhotoViewModel.TakePhotoButtonCommand));
+                RowDefinitions = Rows.Define(
+                    (Row.Title, Auto),
+                    (Row.TakePhotoButton, Auto),
+                    (Row.Photo, Star)),
 
-            Padding = new Thickness(40, 10);
+                Children =
+                {
+                    new Entry().Row(Row.Title).Assign(out _photoImageNameEntry)
+                        .Bind(Entry.TextProperty, nameof(AddPhotoViewModel.PhotoImageNameText)),
 
-            this.SetBinding(TitleProperty, nameof(AddPhotoViewModel.PhotoImageNameText));
+                    new Button { Text = "New Plant Photo" }.Row(Row.TakePhotoButton)
+                        .Bind(Button.CommandProperty, nameof(AddPhotoViewModel.TakePhotoButtonCommand)),
 
-            var gridLayout = new Grid
-            {
-                ColumnDefinitions = { new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) } },
-                RowDefinitions = {
-                    new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                    new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                    new RowDefinition { Height = new GridLength(300, GridUnitType.Absolute) }
+                    new Image().Row(Row.Photo)
+                        .Bind(Image.SourceProperty, nameof(AddPhotoViewModel.PhotoImageSource)),
+
+                    new Frame
+                    {
+                        Content = new StackLayout
+                        {
+                            Children =
+                            {
+                                new Label { Text = "Validating Photo" }.TextCenter()
+                                    .Bind(IsVisibleProperty, nameof(AddPhotoViewModel.IsValidatingPhoto)),
+
+                                new ActivityIndicator()
+                                    .Bind(IsVisibleProperty, nameof(AddPhotoViewModel.IsValidatingPhoto))
+                                    .Bind(ActivityIndicator.IsRunningProperty, nameof(AddPhotoViewModel.IsValidatingPhoto))
+                            }
+                        }
+                    }.Center()
+                     .Bind(IsVisibleProperty, nameof(AddPhotoViewModel.IsValidatingPhoto))
                 }
             };
-
-            gridLayout.Children.Add(_photoImageNameEntry, 0, 0);
-            gridLayout.Children.Add(takePhotoButton, 0, 1);
-            gridLayout.Children.Add(photoImage, 0, 2);
-            gridLayout.Children.Add(validatingPhotoFrame, 0, 2);
-
-            Content = gridLayout;
         }
 
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
+        enum Row { Title, TakePhotoButton, Photo }
 
-            _cancelButton.Clicked += HandleCancelButtonClicked;
-            _viewModel.PhotoSavedToDatabaseCompleted += HandlePhotoSavedToDatabaseCompleted;
-            _viewModel.DisplayNoCameraAvailableAlert += HandleDisplayNoCameraAvailableAlert;
-            _viewModel.DuplicateImageNameDetected += HandleDuplicateImageNameDetected;
-            ComputerVisionService.InvalidPhotoSubmitted += HandleDisplayInvalidPhotoAlert;
-        }
-
-        protected override void OnDisappearing()
-        {
-            base.OnDisappearing();
-
-            _cancelButton.Clicked -= HandleCancelButtonClicked;
-            _viewModel.PhotoSavedToDatabaseCompleted -= HandlePhotoSavedToDatabaseCompleted;
-            _viewModel.DisplayNoCameraAvailableAlert -= HandleDisplayNoCameraAvailableAlert;
-            _viewModel.DuplicateImageNameDetected -= HandleDuplicateImageNameDetected;
-            ComputerVisionService.InvalidPhotoSubmitted -= HandleDisplayInvalidPhotoAlert;
-        }
-
-        void HandleDisplayInvalidPhotoAlert(object sender, InvalidPhotoEventArgs e)
+        void HandleInvalidPhotoSubmitted(object sender, InvalidPhotoEventArgs e)
         {
             var errorString = new StringBuilder();
 
@@ -139,19 +102,19 @@ namespace OnSight
 
             errorString.Remove(errorString.Length - 1, 1);
 
-            Device.BeginInvokeOnMainThread(() => DisplayAlert("Error", errorString.ToString(), "Ok"));
+            MainThread.BeginInvokeOnMainThread(() => DisplayAlert("Error", errorString.ToString(), "Ok"));
         }
 
         void HandleDuplicateImageNameDetected(object sender, EventArgs e) =>
-            Device.BeginInvokeOnMainThread(() => DisplayAlert("Error: Duplicate Photo Name", $"A Photo Entitled {_photoImageNameEntry.Text} Already Exists", "Ok"));
+            MainThread.BeginInvokeOnMainThread(() => DisplayAlert("Error: Duplicate Photo Name", $"A Photo Titled {_photoImageNameEntry.Text} Already Exists", "Ok"));
 
         void HandleDisplayNoCameraAvailableAlert(object sender, EventArgs e) =>
-            Device.BeginInvokeOnMainThread(() => DisplayAlert("Error", "Camera Unavailable", "Ok"));
+            MainThread.BeginInvokeOnMainThread(() => DisplayAlert("Error", "Camera Unavailable", "Ok"));
 
         async void HandlePhotoSavedToDatabaseCompleted(object sender, EventArgs e) => await DismissPage();
 
         async void HandleCancelButtonClicked(object sender, EventArgs e) => await DismissPage();
 
-        Task DismissPage() => Device.InvokeOnMainThreadAsync(() => Navigation.PopModalAsync());
+        Task DismissPage() => MainThread.InvokeOnMainThreadAsync(() => Navigation.PopModalAsync());
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using AsyncAwaitBestPractices;
 using AsyncAwaitBestPractices.MVVM;
 
 namespace OnSight
@@ -14,7 +13,7 @@ namespace OnSight
 
         bool _isListRefreshing;
         ICommand? _refreshCommand;
-        List<PhotoModel> _visibleNoteModelList = Enumerable.Empty<PhotoModel>().ToList();
+        IReadOnlyList<PhotoModel> _visibleNoteModelList = Array.Empty<PhotoModel>();
 
         public PhotosListViewModel(string inspectionId) => _inspectionId = inspectionId;
 
@@ -26,7 +25,7 @@ namespace OnSight
             set => SetProperty(ref _isListRefreshing, value);
         }
 
-        public List<PhotoModel> VisiblePhotoModelList
+        public IReadOnlyList<PhotoModel> VisiblePhotoModelList
         {
             get => _visibleNoteModelList;
             set => SetProperty(ref _visibleNoteModelList, value);
@@ -36,7 +35,7 @@ namespace OnSight
         {
             try
             {
-                await Task.WhenAll(RefreshData(), DisplayRefreshingIndicator(500)).ConfigureAwait(false);
+                await Task.WhenAll(RefreshData(), DisplayRefreshingIndicator(TimeSpan.FromMilliseconds(500))).ConfigureAwait(false);
             }
             finally
             {
@@ -45,10 +44,9 @@ namespace OnSight
         }
 
         async Task RefreshData() =>
-            VisiblePhotoModelList = await PhotoModelDatabase.GetAllPhotosForInspection(_inspectionId);
+            VisiblePhotoModelList = await PhotoModelDatabase.GetAllPhotosForInspection(_inspectionId).ConfigureAwait(false);
 
-        Task DisplayRefreshingIndicator(int indicatorDisplayTimeInSeconds) =>
-            Task.Delay(TimeSpan.FromMilliseconds(indicatorDisplayTimeInSeconds));
+        Task DisplayRefreshingIndicator(TimeSpan timeSpan) => Task.Delay(timeSpan);
     }
 
 }

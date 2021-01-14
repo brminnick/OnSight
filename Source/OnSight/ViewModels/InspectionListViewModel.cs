@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using AsyncAwaitBestPractices.MVVM;
@@ -9,21 +8,21 @@ namespace OnSight
 {
     public class InspectionListViewModel : BaseViewModel
     {
-        bool _isListViewRefreshing;
+        bool _isListRefreshing;
         string _titleEntryText = string.Empty;
         ICommand? _pullToRefreshCommand, _submitButtonCommand;
-        List<InspectionModel> _visibleInspectionModelList = Enumerable.Empty<InspectionModel>().ToList();
+        IReadOnlyList<InspectionModel> _visibleInspectionModelList = Array.Empty<InspectionModel>();
 
         public ICommand PullToRefreshCommand => _pullToRefreshCommand ??= new AsyncCommand(ExecutePullToRefreshCommand);
         public ICommand SubmitButtonCommand => _submitButtonCommand ??= new AsyncCommand(ExecuteSubmitButtonCommand);
 
-        public bool IsListViewRefreshing
+        public bool IsListRefreshing
         {
-            get => _isListViewRefreshing;
-            set => SetProperty(ref _isListViewRefreshing, value);
+            get => _isListRefreshing;
+            set => SetProperty(ref _isListRefreshing, value);
         }
 
-        public List<InspectionModel> VisibleInspectionModelList
+        public IReadOnlyList<InspectionModel> VisibleInspectionModelList
         {
             get => _visibleInspectionModelList;
             set => SetProperty(ref _visibleInspectionModelList, value);
@@ -43,7 +42,7 @@ namespace OnSight
             }
             finally
             {
-                IsListViewRefreshing = false;
+                IsListRefreshing = false;
             }
         }
 

@@ -8,7 +8,7 @@ namespace OnSight
 {
     public class BaseViewModel : INotifyPropertyChanged
     {
-        readonly WeakEventManager _propertyChangedEventManager = new WeakEventManager();
+        readonly WeakEventManager _propertyChangedEventManager = new();
 
         event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
         {
@@ -29,6 +29,6 @@ namespace OnSight
         }
 
         void OnPropertyChanged([CallerMemberName] in string name = "") =>
-            _propertyChangedEventManager.HandleEvent(this, new PropertyChangedEventArgs(name), nameof(INotifyPropertyChanged.PropertyChanged));
+            _propertyChangedEventManager.RaiseEvent(this, new PropertyChangedEventArgs(name), nameof(INotifyPropertyChanged.PropertyChanged));
     }
 }
