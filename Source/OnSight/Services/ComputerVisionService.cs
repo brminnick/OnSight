@@ -16,7 +16,7 @@ namespace OnSight
         static readonly WeakEventManager<InvalidPhotoEventArgs> _invalidPhotoSubmittedEventManager = new WeakEventManager<InvalidPhotoEventArgs>();
 
         static readonly Lazy<ComputerVisionClient> _computerVisionApiClientHolder =
-            new Lazy<ComputerVisionClient>(() => new ComputerVisionClient(new ApiKeyServiceClientCredentials(CognitiveServicesConstants.VisionApiKey)) { Endpoint = CognitiveServicesConstants.VisionApiBaseUrl });
+            new(() => new ComputerVisionClient(new ApiKeyServiceClientCredentials(CognitiveServicesConstants.VisionApiKey)) { Endpoint = CognitiveServicesConstants.VisionApiBaseUrl });
 
         public static event EventHandler<InvalidPhotoEventArgs> InvalidPhotoSubmitted
         {
@@ -45,7 +45,7 @@ namespace OnSight
                 imageAnalysisResult = null;
                 hasInternetConnectionFailed = true;
             }
-            catch (ComputerVisionErrorException e) when (e.Response.StatusCode.Equals(HttpStatusCode.Unauthorized))
+            catch (ComputerVisionErrorResponseException e) when (e.Response.StatusCode.Equals(HttpStatusCode.Unauthorized))
             {
                 DebugService.PrintException(e);
 
